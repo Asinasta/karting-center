@@ -1,0 +1,11 @@
+{
+  "name": "apex-karting-api",
+  "private": true,
+  "scripts": {
+    "lint": "redocly lint",
+    "bundle": "redocly bundle redocly.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "latest"
+  }
+}

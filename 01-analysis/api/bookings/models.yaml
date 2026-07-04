@@ -1,0 +1,58 @@
+openapi: 3.1.0
+info:
+  title: Apex Bookings Models
+  version: 0.1.0
+components:
+  schemas:
+    GearChoice:
+      type: string
+      enum: [own, rental]
+    Booking:
+      type: object
+      required: [id, slot, seats_count, rental_count, seat_gear, price_total, status, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slot:
+          $ref: '../slots/models.yaml#/components/schemas/Slot'
+        seats_count:
+          type: integer
+          minimum: 1
+          maximum: 3
+        rental_count:
+          type: integer
+          minimum: 0
+          maximum: 3
+        seat_gear:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/GearChoice'
+        price_total:
+          $ref: '../common/models.yaml#/components/schemas/Money'
+        status:
+          type: string
+          enum: [active, cancelled, late_cancel, cancelled_by_center, completed]
+        created_at:
+          type: string
+          format: date-time
+        cancelled_at:
+          type: string
+          format: date-time
+        cancel_reason:
+          type: string
+    CreateBookingRequest:
+      type: object
+      required: [slot_id, seat_gear]
+      properties:
+        slot_id:
+          type: string
+          format: uuid
+        seat_gear:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: '#/components/schemas/GearChoice'

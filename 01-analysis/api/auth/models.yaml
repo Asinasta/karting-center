@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Apex Auth Models
+  version: 0.1.0
+components:
+  schemas:
+    SendOtpRequest:
+      type: object
+      required: [phone]
+      properties:
+        phone:
+          type: string
+    VerifyOtpRequest:
+      type: object
+      required: [phone, code]
+      properties:
+        phone:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+          description: Required for a new client
+    TokenPair:
+      type: object
+      required: [access_token, refresh_token]
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer

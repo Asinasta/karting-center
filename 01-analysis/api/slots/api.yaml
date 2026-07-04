@@ -1,0 +1,58 @@
+openapi: 3.1.0
+info:
+  title: Apex Slots API
+  version: 0.1.0
+paths:
+  /slots:
+    get:
+      operationId: listSlots
+      summary: List karting slots
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: date_from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: date_to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: track_config_type
+          in: query
+          schema: { type: array, items: { type: string, enum: [novice, experienced] } }
+        - name: marshal_id
+          in: query
+          schema: { type: array, items: { type: string, format: uuid } }
+        - name: only_available
+          in: query
+          schema: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Slots
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: './models.yaml#/components/schemas/Slot'
+  /slots/{slotId}:
+    get:
+      operationId: getSlot
+      summary: Get slot details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: slotId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Slot
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Slot'
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../common/models.yaml#/components/securitySchemes/bearerAuth'

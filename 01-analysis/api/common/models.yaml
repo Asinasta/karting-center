@@ -1,0 +1,51 @@
+openapi: 3.1.0
+info:
+  title: Apex Common Models
+  version: 0.1.0
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - slot_full
+            - double_booking
+            - slot_cancelled
+            - slot_started
+            - already_cancelled
+            - invalid_code
+            - rate_limit
+            - unauthorized
+            - server_error
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount:
+          type: integer
+          description: Amount in kopecks
+        currency:
+          type: string
+          enum: [RUB]
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer

@@ -1,0 +1,62 @@
+openapi: 3.1.0
+info:
+  title: Apex Profile API
+  version: 0.1.0
+paths:
+  /profile:
+    get:
+      operationId: getProfile
+      summary: Get my profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Profile'
+    patch:
+      operationId: updateProfile
+      summary: Update my profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Profile'
+    delete:
+      operationId: deleteAccount
+      summary: Delete account
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Account deleted
+  /profile/push-token:
+    post:
+      operationId: registerPushToken
+      summary: Register push token from Flutter app
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/PushTokenRequest'
+      responses:
+        '204':
+          description: Token registered
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../common/models.yaml#/components/securitySchemes/bearerAuth'

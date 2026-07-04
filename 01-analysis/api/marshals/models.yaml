@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info:
+  title: Apex Marshals Models
+  version: 0.1.0
+components:
+  schemas:
+    Marshal:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string

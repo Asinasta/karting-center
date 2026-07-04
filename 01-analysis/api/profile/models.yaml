@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Apex Profile Models
+  version: 0.1.0
+components:
+  schemas:
+    Profile:
+      type: object
+      required: [id, name, phone]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        phone:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+    PushTokenRequest:
+      type: object
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+        platform:
+          type: string
+          enum: [ios, android]

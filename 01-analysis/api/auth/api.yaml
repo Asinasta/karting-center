@@ -1,0 +1,50 @@
+openapi: 3.1.0
+info:
+  title: Apex Auth API
+  version: 0.1.0
+paths:
+  /auth/otp:
+    post:
+      operationId: sendOtp
+      summary: Send SMS OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/SendOtpRequest'
+      responses:
+        '204':
+          description: OTP sent
+        '429':
+          description: Rate limit
+  /auth/verify:
+    post:
+      operationId: verifyOtp
+      summary: Verify SMS OTP and sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/VerifyOtpRequest'
+      responses:
+        '200':
+          description: Token pair
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/TokenPair'
+        '400':
+          description: Invalid code
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh access token
+      responses:
+        '200':
+          description: Token pair
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/TokenPair'

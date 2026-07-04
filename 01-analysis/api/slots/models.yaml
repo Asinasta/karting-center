@@ -1,0 +1,65 @@
+openapi: 3.1.0
+info:
+  title: Apex Slots Models
+  version: 0.1.0
+components:
+  schemas:
+    TrackConfig:
+      type: object
+      required: [id, name, type, capacity_cap]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [novice, experienced]
+        capacity_cap:
+          type: integer
+        duration_min:
+          type: integer
+        geometry:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+    Slot:
+      type: object
+      required: [id, track_config, marshal, start_at, total_seats, free_seats, free_rental_gear, price, rental_price, meeting_point, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        track_config:
+          $ref: '#/components/schemas/TrackConfig'
+        marshal:
+          $ref: '../marshals/models.yaml#/components/schemas/Marshal'
+        start_at:
+          type: string
+          format: date-time
+        total_seats:
+          type: integer
+        free_seats:
+          type: integer
+        free_rental_gear:
+          type: integer
+        price:
+          $ref: '../common/models.yaml#/components/schemas/Money'
+        rental_price:
+          $ref: '../common/models.yaml#/components/schemas/Money'
+        meeting_point:
+          type: string
+        meeting_point_lat:
+          type: number
+        meeting_point_lng:
+          type: number
+        status:
+          type: string
+          enum: [scheduled, cancelled]
+        cancel_reason:
+          type: string

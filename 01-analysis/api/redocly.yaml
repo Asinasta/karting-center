@@ -1,0 +1,17 @@
+# Реестр доменных OpenAPI-документов картинг-центра «Апекс».
+apis:
+  auth:
+    root: auth/api.yaml
+  slots:
+    root: slots/api.yaml
+  bookings:
+    root: bookings/api.yaml
+  profile:
+    root: profile/api.yaml
+  marshals:
+    root: marshals/api.yaml
+
+rules:
+  no-unresolved-refs: error
+  no-unused-components: warn
+  operation-operationId-unique: error

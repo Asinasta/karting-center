@@ -1,0 +1,103 @@
+openapi: 3.1.0
+info:
+  title: Apex Bookings API
+  version: 0.1.0
+paths:
+  /bookings:
+    get:
+      operationId: listBookings
+      summary: List my bookings
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Bookings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: './models.yaml#/components/schemas/Booking'
+                  pagination:
+                    $ref: '../common/models.yaml#/components/schemas/Pagination'
+    post:
+      operationId: createBooking
+      summary: Create booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Created booking
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '409':
+          description: Slot full or double booking
+        '410':
+          description: Slot cancelled
+  /bookings/{bookingId}:
+    get:
+      operationId: getBooking
+      summary: Get booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Booking
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+  /bookings/{bookingId}/cancel:
+    post:
+      operationId: cancelBooking
+      summary: Cancel booking
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Updated booking
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '409':
+          description: Already cancelled
+        '422':
+          description: Slot started
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: '../common/models.yaml#/components/securitySchemes/bearerAuth'
