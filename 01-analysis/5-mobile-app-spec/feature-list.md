@@ -28,12 +28,12 @@ flowchart TD
 | ID | Фича | Приоритет | API |
 | :-- | :-- | :-- | :-- |
 | F-001 | OTP-вход | Must | `sendOtp`, `verifyOtp` |
-| F-002 | Список заездов | Must | `listSlots` |
+| F-002 | Публичный список заездов | Must | `listSlots` |
 | F-003 | Фильтры | Must | `listSlots`, `listMarshals` |
 | F-004 | Карточка заезда | Must | `getSlot` |
 | F-005 | Создание брони | Must | `createBooking` |
 | F-006 | Мои записи | Must | `listBookings` |
 | F-007 | Отмена брони | Must | `cancelBooking` |
-| F-008 | Профиль | Must | `getProfile`, `updateProfile`, `deleteAccount` |
-| F-009 | Push | Should | `registerPushToken` |
+| F-008 | Профиль | Must | `getProfile`, `updateProfile`, `sendPhoneChangeOtp`, `verifyPhoneChange`, `deleteAccount` |
+| F-009 | Push: отмена центром Must, напоминания Should | Must/Should | `registerPushToken` |
 | F-010 | Карта трассы | Must | данные `geometry`, `meeting_point` |

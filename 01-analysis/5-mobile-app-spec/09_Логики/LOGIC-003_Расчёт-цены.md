@@ -7,8 +7,8 @@ SCR-003, SCR-004, BS-002, SCR-006.
 ## Правила
 
 - Сервер — источник истины по `price_total`.
-- Формула для понимания UI: `price_total = price * seats_count + rental_price * rental_count`.
-- Flutter-клиент может показывать предварительную оценку, но после ответа API отображает только `price_total`.
+- Формула локального preview для понимания UI: `preview_total = price * seats_count + rental_price * rental_count`.
+- Flutter-клиент может показывать предварительную оценку до подтверждения, но после ответа API отображает только `price_total`.
 - Валюта — RUB.
 
 ## Ошибки

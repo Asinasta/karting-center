@@ -18,7 +18,7 @@ paths:
                 $ref: './models.yaml#/components/schemas/Profile'
     patch:
       operationId: updateProfile
-      summary: Update my profile
+      summary: Update my profile name
       security:
         - bearerAuth: []
       requestBody:
@@ -33,6 +33,12 @@ paths:
             application/json:
               schema:
                 $ref: './models.yaml#/components/schemas/Profile'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
     delete:
       operationId: deleteAccount
       summary: Delete account
@@ -41,6 +47,80 @@ paths:
       responses:
         '204':
           description: Account deleted
+        '409':
+          description: Account has booking state that cannot be processed immediately
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+  /profile/phone-change/otp:
+    post:
+      operationId: sendPhoneChangeOtp
+      summary: Send OTP to a new phone number
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/PhoneChangeOtpRequest'
+      responses:
+        '204':
+          description: OTP sent to new phone
+        '409':
+          description: Phone already used
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '429':
+          description: Rate limit
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../common/models.yaml#/components/schemas/Error'
+                  - $ref: '../common/models.yaml#/components/schemas/RetryAfter'
+  /profile/phone-change/verify:
+    post:
+      operationId: verifyPhoneChange
+      summary: Verify OTP and update profile phone
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/VerifyPhoneChangeRequest'
+      responses:
+        '200':
+          description: Updated profile with new phone
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Profile'
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '409':
+          description: Phone already used
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '429':
+          description: Rate limit or too many attempts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../common/models.yaml#/components/schemas/Error'
+                  - $ref: '../common/models.yaml#/components/schemas/RetryAfter'
   /profile/push-token:
     post:
       operationId: registerPushToken
@@ -56,6 +136,12 @@ paths:
       responses:
         '204':
           description: Token registered
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:

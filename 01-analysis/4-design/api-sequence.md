@@ -4,11 +4,13 @@
 
 ## Общие правила
 
-- Все защищённые запросы используют `Authorization: Bearer <access_token>`.
+- `GET /slots`, `GET /slots/{slotId}` и `GET /marshals` доступны без авторизации.
+- Все персональные запросы и мутации используют `Authorization: Bearer <access_token>`.
 - При `401` Flutter-клиент пытается обновить access token по refresh token.
 - Создание брони всегда отправляется с `Idempotency-Key`.
 - `createBooking` передаёт выбранные места массивом `seat_gear[]`; `seats_count` вычисляется сервером как длина массива.
 - Сервер — источник истины по местам, прокатной экипировке, цене и времени.
+- До создания брони клиент показывает локальный price preview; финальный `price_total` берётся только из ответа `createBooking`.
 
 ## Сценарий 1: Создание брони
 
@@ -19,6 +21,10 @@ sequenceDiagram
   participant API as Bookings API
 
   User->>App: Нажимает «Записаться»
+  alt Нет активной сессии
+    App->>API: POST /auth/otp + POST /auth/verify
+    API-->>App: TokenPair
+  end
   App->>App: Генерирует Idempotency-Key
   App->>API: POST /bookings {slot_id, seat_gear[]} + Bearer + Idempotency-Key
   API->>API: Проверяет места, прокатную экипировку, статус слота
@@ -31,6 +37,12 @@ sequenceDiagram
   else Слот отменён
     API-->>App: 410 slot_cancelled
     App-->>User: Отключить CTA записи
+  else Уже есть активная бронь
+    API-->>App: 409 double_booking {booking_id}
+    App-->>User: Предложить открыть существующую бронь
+  else Слот уже стартовал
+    API-->>App: 422 slot_started
+    App-->>User: Запись недоступна
   else Таймаут
     App->>API: Повтор с тем же Idempotency-Key
     API-->>App: Тот же результат без дубля
@@ -79,5 +91,29 @@ sequenceDiagram
   else Refresh истёк
     API-->>App: 401 unauthorized
     App-->>App: Очистить secure storage
+  end
+```
+
+## Сценарий 4: Смена телефона в профиле
+
+```mermaid
+sequenceDiagram
+  actor User as Клиент
+  participant App as Flutter App
+  participant API as Profile API
+
+  User->>App: Вводит новый номер
+  App->>API: POST /profile/phone-change/otp {new_phone} + Bearer
+  alt OTP отправлен
+    API-->>App: 204
+    User->>App: Вводит SMS-код
+    App->>API: POST /profile/phone-change/verify {new_phone, code} + Bearer
+    API-->>App: 200 Profile {phone: new_phone}
+  else Номер занят
+    API-->>App: 409 phone_already_used
+    App-->>User: Старый номер остаётся активным
+  else Неверный код или rate limit
+    API-->>App: invalid_code / rate_limit
+    App-->>User: Показать ошибку, старый номер остаётся активным
   end
 ```

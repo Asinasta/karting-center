@@ -51,13 +51,30 @@
 | status | enum (`scheduled`, `cancelled`) | Статус слота; `cancelled` означает отмену центром |
 | cancel_reason | string? | Причина отмены центром |
 
+### BookingSlotSnapshot
+
+| Атрибут | Тип | Описание |
+| :-- | :-- | :-- |
+| id | UUID | Идентификатор исходного слота |
+| track_config | TrackConfig | Snapshot конфигурации трассы на момент брони |
+| marshal | Marshal | Snapshot назначенного маршала на момент брони |
+| start_at | datetime UTC | Snapshot времени старта на момент брони |
+| price | money RUB | Snapshot цены за место на момент брони |
+| rental_price | money RUB | Snapshot цены проката на момент брони |
+| meeting_point | string | Snapshot места сбора |
+| meeting_point_lat | float? | Широта места сбора, если доступна |
+| meeting_point_lng | float? | Долгота места сбора, если доступна |
+| geometry | polyline? | Snapshot схемы трассы, если доступна |
+| status | enum (`scheduled`, `cancelled`) | Актуализируемый статус слота для отмены центром |
+| cancel_reason | string? | Актуализируемая причина отмены центром |
+
 ### Booking
 
 | Атрибут | Тип | Описание |
 | :-- | :-- | :-- |
 | id | UUID | Идентификатор брони |
 | client_id | UUID | Владелец брони |
-| slot | Slot | Слот |
+| slot | BookingSlotSnapshot | Snapshot параметров слота для истории брони; статус/причина отмены центром могут актуализироваться |
 | seats_count | int | Число мест, 1–3; лимит 3 — предположение/R-013 |
 | rental_count | int | Число прокатных комплектов, не больше числа мест |
 | seat_gear | array enum (`own`, `rental`) | Выбор экипировки по каждому месту |
@@ -82,7 +99,8 @@
 ```mermaid
 erDiagram
   CLIENT ||--o{ BOOKING : owns
-  SLOT ||--o{ BOOKING : contains
+  SLOT ||--o{ BOOKING_SLOT_SNAPSHOT : source
+  BOOKING ||--|| BOOKING_SLOT_SNAPSHOT : stores
   TRACK_CONFIG ||--o{ SLOT : defines
   MARSHAL ||--o{ SLOT : leads
 
@@ -108,6 +126,11 @@ erDiagram
     int free_rental_gear
     string status
   }
+  BOOKING_SLOT_SNAPSHOT {
+    uuid id
+    datetime start_at
+    string status
+  }
   BOOKING {
     uuid id
     int seats_count
@@ -122,5 +145,7 @@ erDiagram
 - `seats_count <= min(slot.free_seats, slot.track_config.capacity_cap, 3)`, где лимит 3 — предположение/R-013.
 - `rental_count <= slot.free_rental_gear`.
 - `price_total` рассчитывает сервер.
+- До создания брони клиент может показывать локальный preview: `slot.price * seats_count + slot.rental_price * rental_count`; после создания источником истины является `Booking.price_total`.
+- `Booking.slot` — snapshot параметров слота на момент брони. Для отмены центром backend актуализирует `Booking.status`, `Booking.slot.status`, `cancel_reason`.
 - Клиент не изменяет `Slot`, `TrackConfig`, `Marshal`.
-- При удалении аккаунта активные брони отменяются, исторические данные анонимизируются.
+- При удалении аккаунта к активным броням применяется обычная политика отмен: ранние становятся `cancelled`, поздние — `late_cancel`, начавшиеся/завершённые обрабатываются существующей инфраструктурой; исторические персональные данные анонимизируются.

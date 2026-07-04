@@ -1,81 +1,77 @@
 # План реализации Flutter-клиента для «Апекс»
 
-## Контекст анализа
+## Решение по реализации
 
-Документ проектирует клиентское мобильное приложение «Апекс» для iOS и Android на Flutter. Основа: clean architecture, feature-first структура, контрактная интеграция с BE и OpenAPI из `01-analysis/api`.
+Клиент MVP — Flutter-приложение для iOS и Android. Приложение работает только с ролью **Клиент** и интегрируется с REST API из `01-analysis/api`.
 
-Источники:
+Список и карточки заездов доступны в гостевом режиме без авторизации. OTP-вход требуется при попытке создать бронь, открыть «Мои записи», открыть «Профиль» или выполнить другую персональную операцию.
 
-- `01-analysis/5-mobile-app-spec/README.md` и экранные ТЗ `SCR-*`, `BS-*`.
-- Переиспользуемые логики `01-analysis/5-mobile-app-spec/09_Логики/LOGIC-*`.
-- API-контракты `01-analysis/api/{auth,slots,bookings,profile,marshals}/`.
-- `01-analysis/2-requirements/user-stories.md`.
-- `01-analysis/2-requirements/use-cases.md`.
-- `02-development/BE_IMPLEMENTATION_PLAN.md`.
+В MVP не реализуются интерфейс маршала, интерфейс владельца, админка, создание/редактирование расписания, онлайн-оплата, оценки маршалов, лояльность и авто-погода.
 
-## Выводы по требованиям
+## Предварительный стек
 
-MVP-клиент покрывает только роль клиента:
+Конкретные пакеты подтверждаются при bootstrap проекта. На уровне плана фиксируем роли библиотек:
 
-- `SCR-001` регистрация / вход по телефону и OTP.
-- `SCR-002` список заездов.
-- `BS-001` фильтры.
-- `SCR-003` карточка заезда.
-- `SCR-004` оформление записи.
-- `BS-002` успех записи и запрос push-разрешения.
-- `SCR-005` мои записи.
-- `SCR-006` детали брони и отмена.
-- `BS-003` подтверждение отмены.
-- `BS-004` карта трассы.
-- `SCR-007` профиль, выход, операции профиля.
+- Flutter stable, Dart 3.
+- Управление состоянием: согласованный reactive state management подход.
+- Навигация: declarative router с поддержкой auth gate и return intent.
+- HTTP-клиент: typed REST client с interceptor-слоем.
+- Модели: immutable DTO/domain models + JSON serialization.
+- Защищённое хранилище токенов: системное secure storage через согласованный Flutter-плагин.
+- Локальный кэш для offline stale: согласованное key-value/document хранилище.
+- Push-уведомления: системный push через согласованный Flutter-плагин.
+- Карта: согласованный Flutter-плагин карт или текстовый fallback.
+- Окружения/flavors: `--dart-define` или согласованный env-подход.
+- Тесты: `flutter_test`, mock framework, HTTP mock adapter.
+- Линтеры: `flutter_lints` или согласованный ruleset.
 
-Клиент не должен реализовывать marshal/admin/owner UI, schedule CRUD, создание/редактирование слотов, онлайн-оплату, оценки маршалов, loyalty, no-show и auto-weather cancellation.
+## Источники для разработки
 
-Сквозные логики, которые должны стать отдельными domain/application сервисами или pure-функциями:
+- Экраны: `01-analysis/5-mobile-app-spec/*.md`.
+- Общие логики: `01-analysis/5-mobile-app-spec/09_Логики/LOGIC-*.md`.
+- User stories: `01-analysis/2-requirements/user-stories.md`.
+- Use cases: `01-analysis/2-requirements/use-cases.md`.
+- API-контракт: `01-analysis/api/`.
+- BE handoff: `02-development/BE_IMPLEMENTATION_PLAN.md`.
 
-- `LOGIC-001` OTP-авторизация и сессия.
-- `LOGIC-002` доступность: `min(free_seats, track_config.capacity_cap, 3)` плюс проверка `free_rental_gear`.
-- `LOGIC-003` цена: серверный `price_total` является источником истины для созданной брони; локальный расчёт допускается только как preview.
-- `LOGIC-004` отмена: `>= 2h` ранняя, `< 2h` поздняя, после старта отмена недоступна.
-- `LOGIC-005` фильтры слотов: OR внутри группы, AND между группами.
-- `LOGIC-006` карта: Flutter-плагин карт или fallback; обязательный текстовый fallback.
-- `LOGIC-007` push-разрешение после первой успешной брони.
-- `LOGIC-008` Loading / Content / Empty / Error / Offline stale.
+## Экраны MVP
 
-## Выводы по текущему BE/API
-
-Клиентские endpoints:
-
-| Домен | operationId | Метод |
+| ID | Экран / bottom sheet | Фича |
 |---|---|---|
-| Auth | `sendOtp` | `POST /auth/otp` |
-| Auth | `verifyOtp` | `POST /auth/verify` |
-| Auth | `refreshToken` | `POST /auth/refresh` |
-| Slots | `listSlots` | `GET /slots` |
-| Slots | `getSlot` | `GET /slots/{slotId}` |
-| Marshals | `listMarshals` | `GET /marshals` |
-| Bookings | `createBooking` | `POST /bookings` |
-| Bookings | `listBookings` | `GET /bookings` |
-| Bookings | `getBooking` | `GET /bookings/{bookingId}` |
-| Bookings | `cancelBooking` | `POST /bookings/{bookingId}/cancel` |
-| Profile | `getProfile` | `GET /profile` |
-| Profile | `updateProfile` | `PATCH /profile` |
-| Profile | `deleteAccount` | `DELETE /profile` |
-| Profile | `registerPushToken` | `POST /profile/push-token` |
+| `SCR-001` | Регистрация / вход | OTP-авторизация |
+| `SCR-002` | Список заездов | Точка входа в запись |
+| `BS-001` | Фильтры | Фильтры записи |
+| `SCR-003` | Карточка заезда | Детали заезда |
+| `SCR-004` | Оформление записи | Форма бронирования |
+| `BS-002` | Успех записи | Подтверждение брони |
+| `SCR-005` | Мои записи | Список броней клиента |
+| `SCR-006` | Детали брони | Детальная карточка брони |
+| `BS-003` | Подтверждение отмены | Отмена брони |
+| `BS-004` | Карта трассы | Карта и fallback |
+| `SCR-007` | Профиль | Профиль клиента |
 
-BE важные особенности для клиента:
+## API-операции
 
-- Bearer access token хранится в secure storage.
-- При `401` клиент централизованно пробует refresh; если refresh неуспешен, очищает сессию и открывает auth flow.
-- `createBooking` требует `Idempotency-Key`; клиент генерирует UUID на одну попытку отправки формы и держит ключ для retry того же payload.
-- `createBooking` отправляет `slot_id` и `seat_gear[]`; `seats_count` вычисляет сервер.
-- Ошибки приходят в формате `{ code, message, details? }`; action errors показываются snackbar/dialog без разрушения текущего content state.
-- `slot_full` может содержать актуальные значения мест/проката в `details`; UI должен обновлять форму и подсказывать уменьшить места/прокат.
-- `Slot.status = cancelled` означает отмену заезда центром; `Booking.status = cancelled` означает раннюю отмену клиентом.
+| Репозиторий | operationId | Endpoint |
+|---|---|---|
+| `AuthRepository` | `sendOtp` | `POST /auth/otp` |
+| `AuthRepository` | `verifyOtp` | `POST /auth/verify` |
+| `AuthRepository` | `refreshToken` | `POST /auth/refresh` |
+| `SlotRepository` | `listSlots` | `GET /slots` без токена |
+| `SlotRepository` | `getSlot` | `GET /slots/{slotId}` без токена |
+| `MarshalRepository` | `listMarshals` | `GET /marshals` без токена |
+| `BookingRepository` | `createBooking` | `POST /bookings` |
+| `BookingRepository` | `listBookings` | `GET /bookings` |
+| `BookingRepository` | `getBooking` | `GET /bookings/{bookingId}` |
+| `BookingRepository` | `cancelBooking` | `POST /bookings/{bookingId}/cancel` |
+| `ProfileRepository` | `getProfile` | `GET /profile` |
+| `ProfileRepository` | `updateProfile` | `PATCH /profile` только имя |
+| `ProfileRepository` | `sendPhoneChangeOtp` | `POST /profile/phone-change/otp` |
+| `ProfileRepository` | `verifyPhoneChange` | `POST /profile/phone-change/verify` |
+| `ProfileRepository` | `deleteAccount` | `DELETE /profile` |
+| `ProfileRepository` | `registerPushToken` | `POST /profile/push-token` |
 
-## Целевая структура проекта
-
-Создать клиент под `client/`:
+## Структура проекта
 
 ```text
 client/
@@ -88,14 +84,14 @@ client/
       app_router.dart
       app_scope.dart
     core/
+      application/
       config/
       error/
       network/
       storage/
+      theme/
       time/
       ui/
-      theme/
-      utils/
     features/
       auth/
       slots/
@@ -107,465 +103,552 @@ client/
   integration_test/
 ```
 
-Рекомендуемый стек:
+## Архитектурные правила
 
-- Flutter stable + Dart 3.
-- State management: Riverpod или Bloc. Для MVP предпочтителен Riverpod с immutable state и use case слоями.
-- Navigation: `go_router`.
-- Network: `dio` + interceptors для Bearer/refresh.
-- Serialization: `json_serializable` + `freezed`.
-- Secure storage: `flutter_secure_storage`.
-- Push: FCM/APNs через `firebase_messaging` или выбранный командой плагин.
-- Maps: согласованный Flutter-плагин карт; fallback обязателен.
-- Local cache: lightweight repository cache или Drift/Hive только если offline stale нужно переживать рестарт приложения.
-- Tests: unit/widget/integration tests.
+- Структура проекта строится по фичам.
+- У каждой фичи есть `data`, `domain`, `application`, `presentation`.
+- UI не вызывает HTTP-клиент напрямую.
+- Presentation-слой использует согласованные state notifiers/controllers.
+- Application-слой содержит use cases/controllers: `StartBookingIntent`, `SubmitBooking`, `ChangePhone`, `DeleteAccount`, `RegisterPushToken`, `OpenProtectedRoute`.
+- Доменные правила — чистый Dart, покрытый unit tests.
+- DTO изолированы в `data`.
+- UI models собираются из domain models.
+- Хранение токенов идёт только через `SessionRepository`.
+- Ошибки API мапятся в типизированный `AppFailure`.
+- Навигация не решает бизнес-логику напрямую: protected routes вызывают auth gate и возвращаются к сохранённому return intent.
 
-## Чистая архитектура
-
-Зависимости направлены внутрь:
-
-```text
-presentation -> application/usecase -> domain
-data -> domain interfaces
-platform adapters -> shared interfaces
-```
-
-Слои:
-
-- `domain`: сущности, value objects, pure rules, repository interfaces.
-- `application`: use cases, session orchestration, state reducers/controllers.
-- `data`: API clients, DTO, mappers, repositories, pagination, idempotency persistence.
-- `presentation`: screens, widgets, state controllers, navigation.
-- `platform`: secure storage, push permission, maps, external links, clock.
-
-Пакеты:
-
-```text
-core
-  config
-  error
-  network
-  storage
-  time
-  ui
-  theme
-features
-  auth
-  slots
-  booking
-  profile
-  map
-  notifications
-```
-
-## Domain model
-
-Основные модели:
+## Session model
 
 ```dart
-class Client {
-  final String id;
-  final String name;
-  final String phone;
-}
-
-class TrackConfig {
-  final String id;
-  final String name;
-  final String? description;
-  final TrackConfigType type;
-  final int capacityCap;
-  final int? durationMin;
-  final List<GeoPoint>? geometry;
-}
-
-class Slot {
-  final String id;
-  final TrackConfig trackConfig;
-  final Marshal marshal;
-  final DateTime startAt;
-  final int totalSeats;
-  final int freeSeats;
-  final int freeRentalGear;
-  final Money price;
-  final Money rentalPrice;
-  final MeetingPoint meetingPoint;
-  final SlotStatus status;
-  final String? cancelReason;
-}
-
-class Booking {
-  final String id;
-  final Slot slot;
-  final int seatsCount;
-  final int rentalCount;
-  final List<GearChoice> seatGear;
-  final Money priceTotal;
-  final BookingStatus status;
-  final DateTime createdAt;
-  final DateTime? cancelledAt;
-  final String? cancelReason;
+sealed class SessionState {}
+class GuestSession extends SessionState {}
+class AuthenticatedSession extends SessionState {
+  final Client client;
 }
 ```
 
-Pure services:
+Правила:
 
-- `AvailabilityPolicy`: `maxSeatsForBooking(slot)`, `canRentGear(seatGear, slot)`.
-- `BookingPricePreviewCalculator`: `price * seats + rentalPrice * rental`.
-- `CancellationPolicy`: `early`, `late`, `unavailableAfterStart`.
-- `SlotFilterPolicy`: query builder and applied filter count.
-- `BookingGroupingPolicy`: upcoming/past/cancelled derived from `slot.startAt` and booking status.
+- Приложение стартует в `GuestSession`, если нет валидной сессии.
+- `SCR-002`, `SCR-003`, `BS-001`, `BS-004` доступны гостю.
+- `SCR-004`, `SCR-005`, `SCR-006`, `SCR-007` и все мутации требуют `AuthenticatedSession`.
+- При попытке защищённого действия в гостевом режиме открывается `AuthFlow`, после успеха выполняется return intent.
 
-## State стандарт
-
-Каждый экран получает:
-
-- `State`: immutable UI state.
-- `Intent/Action`: пользовательские действия.
-- `Effect`: одноразовые события навигации/snackbar/system dialog.
-- `Controller/Notifier`: use case calls, reducer-style state updates.
-
-Базовые типы:
+## Базовые модели
 
 ```dart
-sealed class Loadable<T> {
-  const Loadable();
-}
+enum TrackConfigType { novice, experienced }
+enum GearChoice { own, rental }
+enum SlotStatus { scheduled, cancelled }
+enum BookingStatus { active, cancelled, lateCancel, cancelledByCenter, completed }
 
-final class Loading<T> extends Loadable<T> {}
-final class Content<T> extends Loadable<T> {
-  final T value;
+class Money {
+  final int amount;
+  final String currency; // RUB
+}
+```
+
+Доменные сущности:
+
+- `Client`;
+- `TrackConfig`;
+- `Marshal`;
+- `Slot`;
+- `Booking`;
+- `BookingSlotSnapshot`;
+- `MeetingPoint`;
+- `Pagination`.
+
+## Доменные правила
+
+### `AvailabilityPolicy`
+
+Правила:
+
+- `maxSeats = min(slot.freeSeats, slot.trackConfig.capacityCap, 3)`.
+- `seatGear.length` должен быть от 1 до `maxSeats`.
+- `rentalCount <= slot.freeRentalGear`.
+- Своя экипировка занимает место, но не расходует прокатную экипировку.
+
+### `BookingPricePreviewCalculator`
+
+Правила:
+
+- Предварительный расчёт: `slot.price * seatsCount + slot.rentalPrice * rentalCount`.
+- Экран созданной брони показывает `price_total` из API.
+- `price_total` из API важнее локального preview.
+
+### `CancellationPolicy`
+
+Правила:
+
+- `startAt - now >= 2h` означает раннюю отмену.
+- `startAt - now < 2h` означает позднюю отмену.
+- `now >= startAt` означает, что отмена недоступна.
+- Клиентский preview информационный; финальный статус приходит из `cancelBooking`.
+
+### `SlotFilterPolicy`
+
+Правила:
+
+- Группы фильтров: период дат, тип трассы, маршал, только доступные.
+- Внутри multi-value группы используется OR.
+- Между группами используется AND.
+- Период по умолчанию: ближайшие 7 дней.
+
+## Модель состояния
+
+Использовать sealed state objects:
+
+```dart
+sealed class LoadState<T> {}
+class Loading<T> extends LoadState<T> {}
+class Content<T> extends LoadState<T> {
+  final T data;
   final bool refreshing;
 }
-final class Empty<T> extends Loadable<T> {}
-final class Failure<T> extends Loadable<T> {
+class Empty<T> extends LoadState<T> {}
+class Failure<T> extends LoadState<T> {
   final UiError error;
 }
 
 enum ActionStatus { idle, submitting }
 ```
 
-Правила:
+Правила экранов:
 
-- Первичная загрузка: `Loading -> Content|Empty|Failure`.
-- Pull-to-refresh: контент сохраняется, `refreshing=true`; ошибка только snackbar.
-- Action submit: отдельный `ActionStatus.submitting`, повторный tap блокируется.
-- 4xx с `message`: snackbar/dialog, а не full-screen error, если это action.
-- `401`: централизованно refresh или очистка сессии и переход в auth flow.
+- Первичная загрузка экрана использует `Loading`.
+- Pull-to-refresh оставляет content и выставляет `refreshing=true`.
+- Мутации используют `ActionStatus.submitting`.
+- Ошибки мутаций показываются через snackbar/dialog.
+- `401` один раз запускает refresh token, затем logout.
 
 ## Навигация
 
-Root graph:
-
 ```text
-Root
-  SplashSessionCheck
-  AuthFlow
-    PhoneStep
-    OtpStep
-    NameStep
-  MainTabs
-    SlotsStack
-      SlotList
-      SlotDetails
-      BookingForm
-    BookingsStack
-      BookingList
-      BookingDetails
-    ProfileStack
-      Profile
+Splash
+MainTabs
+  BookingTab // «Запись»
+    BookingSlotList // public
+    FiltersSheet
+    SlotDetails // public
+    BookingForm // auth gate
+    BookingSuccessSheet
+    TrackMapSheet
+  MyRecordsTab
+    BookingList // auth gate
+    BookingDetails
+    CancelConfirmSheet
+    TrackMapSheet
+  ProfileTab
+    Profile // auth gate
+AuthFlow(returnIntent)
+  PhoneStep
+  OtpStep
+  NameStep
 ```
 
-Bottom sheets:
+Табы:
+
+- `Запись`;
+- `Мои записи`;
+- `Профиль`.
+
+Auth gate:
+
+- Если гость открывает `BookingForm`, `MyRecordsTab` или `ProfileTab`, приложение открывает `AuthFlow(returnIntent)`.
+- После успешного OTP приложение возвращается к исходному действию: выбранному слоту, форме бронирования, списку записей или профилю.
+- Logout переводит сессию в `GuestSession` и оставляет пользователя в публичной части приложения.
+
+## Сетевой слой
+
+Реализовать:
+
+- `HttpClient`;
+- `PublicApiClient` или interceptor skip-list для public endpoints;
+- `AuthorizedApiClient` для персональных endpoints и мутаций;
+- `AuthInterceptor`;
+- `RefreshTokenInterceptor`;
+- `ErrorMapper`;
+- `ApiConfig`.
+
+Правила:
+
+- Base URL берётся из окружения.
+- Public endpoints `GET /slots`, `GET /slots/{slotId}`, `GET /marshals` не отправляют access token и работают в `GuestSession`.
+- Все защищённые запросы содержат `Authorization: Bearer <access_token>`.
+- Refresh token flow выполняется в single-flight режиме.
+- Неуспешный refresh очищает secure storage.
+- API `Error.code` сохраняется как `ApiFailure.code`.
+- `createBooking` отправляет `Idempotency-Key`.
+- `double_booking.details.booking_id` используется для перехода к существующей брони.
+
+Поддерживаемые API error codes:
+
+- `slot_full`;
+- `double_booking`;
+- `slot_cancelled`;
+- `slot_started`;
+- `already_cancelled`;
+- `invalid_code`;
+- `rate_limit`;
+- `phone_already_used`;
+- `unauthorized`;
+- `forbidden`;
+- `not_found`;
+- `validation_error`;
+- `server_error`.
+
+## Локальный кэш
+
+Использовать согласованное локальное хранилище для read-only fallback:
+
+- `slots_cache`;
+- `bookings_cache`;
+- `profile_cache`.
+
+Правила:
+
+- Кэш — только read-only fallback для уже загруженных данных.
+- Кэшированные данные помечаются в UI как `Offline stale`.
+- Мутации в offline заблокированы.
+- Кэшированная доступность и цена не являются source of truth.
+
+## План реализации фич
+
+### FL-00. Каркас проекта
+
+Сделать:
+
+- Создать `client/`.
+- Добавить `pubspec.yaml`.
+- Добавить зависимости из стека.
+- Добавить `analysis_options.yaml`.
+- Добавить базовое приложение, router, theme, env config.
+
+Готово когда:
+
+- `flutter analyze` проходит.
+- `flutter test` проходит.
+- Приложение стартует и показывает splash/session check.
+
+### FL-01. Тема и общие UI-компоненты
+
+Сделать:
+
+- Реализовать `ApexTheme`.
+- Реализовать tokens:
+  - colors;
+  - typography;
+  - spacing;
+  - radius;
+  - buttons;
+  - text fields;
+  - cards;
+  - bottom sheets;
+  - snackbars.
+- Реализовать общие состояния экранов:
+  - Loading;
+  - Content;
+  - Empty;
+  - Error;
+  - Offline stale.
 
-- `FiltersSheet` over `SlotList`.
-- `BookingSuccessSheet` after successful `createBooking`.
-- `CancelConfirmSheet` over `BookingDetails`.
-- `TrackMapSheet` over `SlotDetails` or `BookingDetails`.
+Готово когда:
 
-## Data layer и API
+- Фичевые экраны используют общие UI primitives.
+- В feature widgets нет hardcoded colors.
+- Touch targets не меньше 44pt.
 
-Репозитории:
+### FL-02. Авторизация `SCR-001`
 
-- `AuthRepository`: `sendOtp`, `verifyOtp`, `refreshToken`.
-- `ProfileRepository`: `getProfile`, `updateProfile`, `deleteAccount`, `registerPushToken`.
-- `SlotRepository`: `listSlots`, `getSlot`.
-- `MarshalRepository`: `listMarshals`.
-- `BookingRepository`: `createBooking`, `listBookings`, `getBooking`, `cancelBooking`.
-- `SessionRepository`: token read/write/clear, auth state stream.
+Сделать:
 
-Dio setup:
+- Поле телефона.
+- Поле OTP.
+- Поле имени для нового клиента.
+- Вызов `sendOtp`.
+- Вызов `verifyOtp`.
+- Сохранение access/refresh tokens.
+- Переход на `returnIntent` после успешного входа или на `SCR-002`, если вход запущен напрямую.
+- Повторная отправка OTP после `retry_after`.
+- Валидация имени и согласия/политики для нового пользователя.
 
-- JSON serialization with snake_case mapping.
-- Base URL from flavor/env config.
-- Auth interceptor injecting `Authorization: Bearer`.
-- Refresh interceptor with single-flight refresh to avoid parallel refresh storms.
-- Response mapper from API `Error` into typed `ApiFailure`.
-- Timeout and network-unavailable mapping.
+Готово когда:
 
-Typed failures:
+- Новый пользователь входит в приложение.
+- Существующий пользователь входит в приложение.
+- `invalid_code` показывает inline/snackbar ошибку.
+- `rate_limit` показывает сообщение о повторной попытке.
+- Вход из сценария бронирования возвращает пользователя к выбранному слоту/форме.
 
-```dart
-sealed class AppFailure {}
-final class UnauthorizedFailure extends AppFailure {}
-final class ApiFailure extends AppFailure {
-  final String code;
-  final String message;
-  final Map<String, Object?>? details;
-}
-final class NetworkUnavailableFailure extends AppFailure {}
-final class TimeoutFailure extends AppFailure {}
-final class UnknownFailure extends AppFailure {}
-```
+### FL-03. Сессия и refresh token
 
-Idempotency:
+Сделать:
 
-- `CreateBookingUseCase` generates UUID `Idempotency-Key` per form submission.
-- Same key is reused for retry of identical `slot_id` and `seat_gear[]`.
-- If payload changes, old key is discarded.
-- On idempotency conflict, show server `message`, regenerate key only after user intentionally retries with a new submission.
+- Реализовать `SessionRepository`.
+- Реализовать secure token storage.
+- Реализовать проверку сессии при старте.
+- Реализовать `refreshToken`.
+- Реализовать auto logout после неуспешного refresh.
+- Реализовать `GuestSession` и `AuthenticatedSession`.
+- Реализовать auth gate для защищённых routes/actions.
+- Реализовать return intent после OTP.
 
-## Feature design
+Готово когда:
 
-### Auth: `SCR-001`, `LOGIC-001`
+- Без refresh token приложение открывает публичный список заездов в `GuestSession`.
+- С валидным refresh token приложение открывает main tabs.
+- `401` один раз запускает refresh.
+- Неуспешный refresh очищает сессию.
+- Защищённые действия из guest mode открывают OTP и возвращаются к исходному действию.
 
-State:
+### FL-04. Публичная запись: список заездов `SCR-002`
 
-- step: phone / otp / name.
-- phone, code, name.
-- resend timer.
-- actionStatus.
+Сделать:
 
-Use cases:
+- Загрузить `GET /slots` без access token.
+- Применить период по умолчанию: ближайшие 7 дней.
+- Отрисовать карточки заездов для выбора записи.
+- Показать disabled-состояние для заполненных и отменённых заездов.
+- Сохранить загруженные slots в локальный read-only cache.
+- Показать offline stale из кэша.
 
-- `SendOtpUseCase`.
-- `VerifyOtpUseCase`.
-- `RefreshTokenUseCase`.
-- `ObserveSessionUseCase`.
+Готово когда:
 
-Acceptance focus:
+- Работают состояния Loading, Content, Empty, Error, Offline stale.
+- Карточки заездов отсортированы по `start_at`.
+- Заполненные и отменённые заезды не открывают CTA записи.
+- Экран работает без авторизации.
 
-- Phone validation before request.
-- OTP field handles invalid code and rate limit.
-- `name` is sent for new client.
-- Successful auth opens `SCR-002`.
+### FL-05. Фильтры `BS-001`
 
-### Slots catalog: `SCR-002`, `BS-001`, `SCR-003`
+Сделать:
 
-State:
+- Загрузить `GET /marshals`.
+- Реализовать фильтры:
+  - период дат;
+  - тип трассы;
+  - маршал;
+  - только доступные.
+- Реализовать применение и сброс фильтров.
 
-- `Loadable<List<SlotSummary>>`.
-- applied filters and draft filters.
-- marshal dictionary load state.
-- active filter count.
+Готово когда:
 
-Use cases:
+- Применённые фильтры обновляют query для `GET /slots`.
+- Сброс возвращает период по умолчанию: ближайшие 7 дней.
+- Пустой результат фильтра показывает корректное empty state.
 
-- `LoadSlotsUseCase`.
-- `RefreshSlotsUseCase`.
-- `LoadMarshalsUseCase`.
-- `BuildSlotQueryUseCase`.
-- `LoadSlotDetailsUseCase`.
+### FL-06. Карточка заезда `SCR-003`
 
-Client rules:
+Сделать:
 
-- Default period is nearest 7 days if no user filter is applied.
-- Default `only_available=false`, unless UI explicitly applies «только свободные».
-- Slots without places are shown disabled/marked if returned by API.
-- Slot details reload with `getSlot` to avoid stale availability before booking.
+- Загрузить `GET /slots/{slotId}`.
+- Показать конфигурацию, маршала, цену, места, прокатную экипировку, точку сбора.
+- Показать preview карты.
+- Открывать `BS-004`.
+- Открывать `SCR-004` только для доступного scheduled slot; при guest mode сначала auth gate.
 
-### Booking form: `SCR-004`, `BS-002`
+Готово когда:
 
-State:
+- Детали перезагружаются перед оформлением брони.
+- Отменённый слот показывает disabled CTA.
+- Текстовый fallback карты работает без map key.
+- Карточка работает без авторизации.
 
-- slot content.
-- `seatGear` list length 1..3 and not above available max.
-- derived `seatsCount` and `rentalCount`.
-- computed total price preview.
-- actionStatus.
+### FL-07. Форма бронирования `SCR-004`
 
-Use cases:
+Сделать:
 
-- `CreateBookingUseCase`.
-- `CalculateAvailabilityUseCase`.
-- `CalculateBookingPricePreviewUseCase`.
-- `RequestPushPermissionAfterBookingUseCase`.
+- Если пользователь в `GuestSession`, сначала выполнить auth gate и вернуть к форме.
+- Показать сводку заезда.
+- Дать выбрать 1-3 места.
+- Дать выбрать свою/прокатную экипировку на каждое место.
+- Валидировать доступность через `AvailabilityPolicy`.
+- Показать предварительный расчёт цены.
+- Отправить `POST /bookings` с `slot_id`, `seat_gear[]`, `Idempotency-Key`.
 
-Client rules:
+Готово когда:
 
-- Do not hardcode track caps or rental gear count.
-- Own gear consumes group seat, not rental gear.
-- On `slot_full`, use `details` to update max and show contextual message.
-- On success, show `BS-002`, invalidate slots and bookings caches.
+- Пользователь не может выбрать больше доступного максимума мест.
+- Пользователь не может выбрать больше прокатной экипировки, чем доступно.
+- `slot_full` обновляет UI серверными значениями.
+- `double_booking` предлагает перейти к существующей брони.
+- `slot_started` блокирует запись и обновляет состояние слота.
+- Успех открывает `BS-002`.
 
-### My bookings: `SCR-005`, `SCR-006`, `BS-003`
+### FL-08. Успех записи `BS-002`
 
-State:
+Сделать:
 
-- bookings list with pagination.
-- upcoming / past / cancelled groups.
-- cancel availability derived by `now < slot.startAt`.
-- cancel type preview by `CancellationPolicy`.
+- Показать сводку брони из API `Booking`.
+- Показать `price_total`.
+- Показать точку сбора.
+- Добавить действия:
+  - перейти в `Мои записи`;
+  - перейти в `Запись`.
+- Запросить permission на push после первой успешной брони.
 
-Use cases:
+Готово когда:
 
-- `LoadBookingsUseCase`.
-- `LoadBookingDetailsUseCase`.
-- `CancelBookingUseCase`.
+- Bottom sheet успеха показывает значения брони из API.
+- Действия навигации работают.
+- Push permission не блокирует успешное оформление брони.
 
-Client rules:
+### FL-09. Мои записи `SCR-005`
 
-- Exactly 2 hours before start is early cancellation.
-- After cancel, replace details with server response and invalidate bookings list/slots.
-- Repeated cancel errors (`already_cancelled`) show snackbar and refresh details.
-- `cancelled_by_center` shows reason and disables repeated booking on the cancelled slot.
+Сделать:
 
-### Profile: `SCR-007`
+- Загрузить `GET /bookings`.
+- Реализовать пагинацию с `limit=20`.
+- Сгруппировать брони:
+  - предстоящие;
+  - прошедшие;
+  - отменённые.
+- Сохранить загруженные bookings в локальный read-only cache.
+- Заменить live-slot предположения на отображение `BookingSlotSnapshot`.
 
-State:
+Готово когда:
 
-- profile loadable.
-- edit name/phone state.
-- delete account confirmation.
-- push permission state.
+- Empty state работает.
+- Offline stale показывает кэшированные брони.
+- `cancelled_by_center` видна в списке.
+- Неавторизованный пользователь попадает в auth gate, затем возвращается к списку.
 
-Use cases:
+### FL-10. Детали брони `SCR-006`
 
-- `LoadProfileUseCase`.
-- `UpdateProfileUseCase`.
-- `LogoutUseCase`.
-- `DeleteAccountUseCase`.
-- `RegisterPushTokenUseCase`.
+Сделать:
 
-Client rules:
+- Загрузить `GET /bookings/{bookingId}`.
+- Показать статус, snapshot данных заезда, маршала, экипировку, цену, точку сбора, карту.
+- Показывать кнопку отмены только для активной будущей брони.
+- Показать причину отмены центром для `cancelled_by_center`.
 
-- Logout clears secure storage locally.
-- Delete account waits for API success, then clears secure storage.
-- Phone change requires OTP if backend enforces this flow.
+Готово когда:
 
-### Maps: `LOGIC-006`, `BS-004`
+- Детали показывают все поля из mobile spec.
+- Видимость кнопки отмены следует статусу и времени.
+- Map sheet открывается из деталей.
+- Чужая/недоступная бронь через `forbidden`/`not_found` показывает безопасный error state.
 
-Shared contract:
+### FL-11. Подтверждение отмены `BS-003`
 
-```dart
-abstract interface class MapLauncher {
-  Future<void> openExternalMap(MeetingPoint point);
-}
-```
+Сделать:
 
-Rules:
+- Показать подтверждение отмены всей брони.
+- Показать раннюю/позднюю отмену через `CancellationPolicy`.
+- Отправить `POST /bookings/{bookingId}/cancel`.
+- Заменить локальные детали ответом API.
 
-- Map preview and map sheet must not call Apex REST API directly.
-- Inputs come from `getSlot` or `getBooking`.
-- If `trackConfig.geometry == null`, show pin + text and treat as Content without line.
-- If map SDK/API/key fails, show text fallback + action to open external maps.
-- Map API key must come from build/env config, never hardcoded in code.
+Готово когда:
 
-## Theme and design tokens
+- Ровно 2 часа до старта показываются как ранняя отмена.
+- Offline cancel заблокирован.
+- `already_cancelled` показывает snackbar и обновляет детали.
+
+### FL-12. Карта трассы `BS-004`
 
-Цель: дизайн-бриф и будущий Figma/UI-kit становятся источником visual tokens, Flutter theme - source of implementation truth.
+Сделать:
 
-Required extraction after design access:
+- Реализовать preview/sheet через согласованный Flutter-плагин карт.
+- Показать pin точки сбора.
+- Нарисовать геометрию трассы, если она есть.
+- Показать текстовый fallback, если карта не загрузилась или geometry отсутствует.
+- Добавить открытие внешней карты.
 
-- Color styles/variables: brand, background, surface, text, border, success, warning, error, info, overlay.
-- Typography: font family, sizes, line heights, weights for display/title/body/label.
-- Spacing scale.
-- Radius scale.
-- Component anatomy: buttons, text fields, chips, cards, bottom sheets, tabs, snackbars, skeletons.
-- Light/dark modes if defined.
+Готово когда:
 
-Flutter implementation:
+- Карта работает с валидной конфигурацией.
+- Текстовый fallback работает без map key.
+- Ошибка карты не блокирует запись.
 
-```text
-core/theme/
-  apex_theme.dart
-  apex_colors.dart
-  apex_typography.dart
-  apex_spacing.dart
-  apex_shapes.dart
-  apex_components.dart
-```
+### FL-13. Профиль `SCR-007`
 
-Theme acceptance:
+Сделать:
 
-- No hardcoded colors in feature screens.
-- No hardcoded typography except inside theme.
-- Components read tokens from `ApexTheme`.
-- Contrast for primary text/buttons meets WCAG AA and `NFR-1`.
-- All screen states from `LOGIC-008` have tokenized skeleton, empty, error and snackbar visuals.
+- Загрузить `GET /profile`.
+- Редактировать имя через `PATCH /profile`.
+- Реализовать смену телефона через `sendPhoneChangeOtp` и `verifyPhoneChange`.
+- Зарегистрировать push token через `POST /profile/push-token`.
+- Logout очищает secure storage.
+- Удаление аккаунта идёт через `DELETE /profile`, затем очищает secure storage.
 
-## Platform specifics
+Готово когда:
 
-Android:
+- Профиль загружается, изменения сохраняются.
+- `PATCH /profile` не отправляет phone.
+- Смена телефона обрабатывает `invalid_code`, `rate_limit`, `phone_already_used`.
+- Logout очищает сессию и возвращает в публичную часть приложения.
+- Удаление аккаунта возвращает в auth flow после успешного ответа API.
+- Push token registration повторяется при следующей загрузке профиля/сессии после ошибки.
 
-- Secure token in `flutter_secure_storage` backed by Android Keystore.
-- Push permission for Android 13+.
-- External map handoff through intent/browser fallback.
+### FL-14. Push `LOGIC-007`
 
-iOS:
+Сделать:
 
-- Secure token in Keychain via `flutter_secure_storage`.
-- Push permission through APNs/FCM.
-- External map handoff through URL schemes/universal links.
+- Запросить system permission после первой успешной брони.
+- Получить системный push token через согласованный Flutter-плагин.
+- Отправить token в `registerPushToken`.
+- Сохранить локальный флаг, что permission уже запрашивался.
 
-## Testing strategy
+Готово когда:
 
-Unit tests:
+- Denied permission не ломает приложение.
+- Granted permission регистрирует token.
+- Token refresh обновляет backend.
+- Push об отмене центром открывает детали брони.
 
-- `LOGIC-002` availability boundaries.
-- `LOGIC-003` price preview calculation.
-- `LOGIC-004` cancellation boundary: `2h+1s`, `2h`, `1h59m59s`, after start.
-- slot filter query builder.
-- booking grouping upcoming/past/cancelled.
-- state controllers for every screen.
-- API error mapping.
+### FL-15. Тесты и smoke flow
 
-Data tests:
+Сделать:
 
-- Dio/mock adapter success/error for every operationId.
-- `401` refresh and session clear.
-- create booking idempotency key reuse/discard behavior.
-- snake_case DTO serialization.
+- Unit tests для policies:
+  - availability;
+  - price preview;
+  - cancellation;
+  - filters;
+  - grouping.
+- Тесты репозиториев с HTTP mock adapter.
+- Widget tests для auth, booking form, cancel sheet.
+- Ручной smoke flow.
 
-Widget tests:
+Готово когда:
 
-- StateContainer Loading/Empty/Error/Offline stale.
-- Auth flow validation.
-- Booking form validation.
-- Cancel confirmation.
+- `flutter analyze` проходит.
+- `flutter test` проходит.
+- Smoke flow проходит:
+  - auth;
+  - `Запись`;
+  - filters;
+  - details;
+  - booking;
+  - success;
+  - `Мои записи`;
+  - cancel;
+  - profile logout.
 
-E2E/manual smoke:
+## Порядок реализации
 
-- Login new user -> name -> slot list -> slot details -> booking -> success -> my bookings -> cancel -> profile logout.
-- Repeat booking network retry with same idempotency key.
-- Map fallback when geometry/key is missing.
+1. `FL-00` Каркас проекта.
+2. `FL-01` Тема и общие UI-компоненты.
+3. `FL-04` Публичная запись: список заездов.
+4. `FL-05` Фильтры.
+5. `FL-06` Карточка заезда.
+6. `FL-03` Сессия, refresh token и auth gate.
+7. `FL-02` Авторизация.
+8. `FL-07` Форма бронирования.
+9. `FL-08` Успех записи.
+10. `FL-09` Мои записи.
+11. `FL-10` Детали брони.
+12. `FL-11` Подтверждение отмены.
+13. `FL-12` Карта трассы.
+14. `FL-13` Профиль и смена телефона.
+15. `FL-14` Push.
+16. `FL-15` Тесты и smoke flow.
 
-## Implementation roadmap
+## Открытые вопросы
 
-- [ ] `FL-00` Create `client/` Flutter skeleton with flavors/env config.
-- [ ] `FL-01` Add dependency catalog, lints, formatting and test tasks.
-- [ ] `FL-02` Implement core architecture: state base, DI, config, clock, error model, logging.
-- [ ] `FL-03` Implement theme skeleton and token import format.
-- [ ] `FL-04` Finalize `ApexTheme` after design token extraction.
-- [ ] `FL-05` Implement network layer and DTOs aligned with OpenAPI.
-- [ ] `FL-06` Implement secure/session storage.
-- [ ] `FL-07` Implement Auth flow `SCR-001`.
-- [ ] `FL-08` Implement main navigation and tabs.
-- [ ] `FL-09` Implement slots list, filters and marshals dictionary `SCR-002`/`BS-001`.
-- [ ] `FL-10` Implement slot card and map preview fallback `SCR-003`.
-- [ ] `FL-11` Implement booking form and success sheet `SCR-004`/`BS-002`.
-- [ ] `FL-12` Implement bookings list/details/cancel `SCR-005`/`SCR-006`/`BS-003`.
-- [ ] `FL-13` Implement track map sheet `BS-004`.
-- [ ] `FL-14` Implement profile view, edit data, logout, delete account `SCR-007`.
-- [ ] `FL-15` Implement push permission and token registration `LOGIC-007`.
-- [ ] `FL-16` Add unit/data/widget tests for core flows.
-- [ ] `FL-17` Run integration smoke against local BE.
-- [ ] `FL-18` Polish accessibility and visual parity with design brief/Figma.
-
-## Open questions and gaps
-
-1. Figma/design tokens are not yet extracted. Need access/tooling before final UI implementation.
-2. Concrete map plugin is not selected. MVP can start with text fallback + external map handoff.
-3. Push reminder timings `[24, 2]` are assumptions; client must not hardcode them as final product truth without API/config.
-4. Phone change flow needs final BE decision: same `updateProfile` with OTP or separate confirmation flow.
-5. Offline stale cache depth needs decision: memory-only for MVP session or persistent cache across app restarts.
+1. Design tokens пока описаны только на уровне design brief. Перед финальной UI-реализацией нужен UI-kit export или таблица tokens.
+2. Карта может стартовать с текстового fallback + открытием внешней карты, если выбранный Flutter-плагин карт не готов.
+3. Push reminder timings `[24, 2]` остаются предположением; клиент не должен считать их финальной продуктовой правдой без API/config.
+4. Глубина offline stale cache требует решения: только memory/session cache для MVP или persistent cache между запусками.

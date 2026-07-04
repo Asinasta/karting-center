@@ -12,10 +12,10 @@ paths:
       parameters:
         - name: limit
           in: query
-          schema: { type: integer, default: 20 }
+          schema: { type: integer, default: 20, minimum: 1, maximum: 100 }
         - name: offset
           in: query
-          schema: { type: integer, default: 0 }
+          schema: { type: integer, default: 0, minimum: 0 }
       responses:
         '200':
           description: Bookings
@@ -30,6 +30,12 @@ paths:
                       $ref: './models.yaml#/components/schemas/Booking'
                   pagination:
                     $ref: '../common/models.yaml#/components/schemas/Pagination'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
     post:
       operationId: createBooking
       summary: Create booking
@@ -39,7 +45,7 @@ paths:
         - name: Idempotency-Key
           in: header
           required: true
-          schema: { type: string }
+          schema: { type: string, minLength: 8, maxLength: 128 }
       requestBody:
         required: true
         content:
@@ -55,8 +61,22 @@ paths:
                 $ref: './models.yaml#/components/schemas/Booking'
         '409':
           description: Slot full or double booking
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
         '410':
           description: Slot cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '422':
+          description: Slot already started or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
   /bookings/{bookingId}:
     get:
       operationId: getBooking
@@ -75,6 +95,24 @@ paths:
             application/json:
               schema:
                 $ref: './models.yaml#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '403':
+          description: Booking belongs to another client
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
   /bookings/{bookingId}/cancel:
     post:
       operationId: cancelBooking
@@ -95,8 +133,34 @@ paths:
                 $ref: './models.yaml#/components/schemas/Booking'
         '409':
           description: Already cancelled
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
         '422':
           description: Slot started
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '403':
+          description: Booking belongs to another client
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:

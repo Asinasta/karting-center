@@ -13,21 +13,47 @@ components:
           format: uuid
         name:
           type: string
+          minLength: 1
+          maxLength: 80
         phone:
           type: string
+          pattern: '^\\+[1-9]\\d{7,14}$'
     UpdateProfileRequest:
       type: object
       properties:
         name:
           type: string
-        phone:
+          minLength: 1
+          maxLength: 80
+    PhoneChangeOtpRequest:
+      type: object
+      required: [new_phone]
+      properties:
+        new_phone:
           type: string
+          pattern: '^\\+[1-9]\\d{7,14}$'
+    VerifyPhoneChangeRequest:
+      type: object
+      required: [new_phone, code]
+      properties:
+        new_phone:
+          type: string
+          pattern: '^\\+[1-9]\\d{7,14}$'
+        code:
+          type: string
+          minLength: 4
+          maxLength: 8
     PushTokenRequest:
       type: object
       required: [token, platform]
       properties:
         token:
           type: string
+          minLength: 16
+          maxLength: 4096
         platform:
           type: string
           enum: [ios, android]
+        device_id:
+          type: string
+          description: Stable app-generated device identifier for token upsert and logout cleanup.

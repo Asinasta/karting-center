@@ -23,7 +23,11 @@ components:
             - already_cancelled
             - invalid_code
             - rate_limit
+            - phone_already_used
             - unauthorized
+            - forbidden
+            - not_found
+            - validation_error
             - server_error
         message:
           type: string
@@ -49,3 +53,11 @@ components:
           type: integer
         total:
           type: integer
+    RetryAfter:
+      type: object
+      required: [retry_after]
+      properties:
+        retry_after:
+          type: integer
+          description: Seconds until retry is allowed
+          minimum: 0

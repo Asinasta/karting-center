@@ -18,6 +18,12 @@ paths:
           description: OTP sent
         '429':
           description: Rate limit
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../common/models.yaml#/components/schemas/Error'
+                  - $ref: '../common/models.yaml#/components/schemas/RetryAfter'
   /auth/verify:
     post:
       operationId: verifyOtp
@@ -37,6 +43,18 @@ paths:
                 $ref: './models.yaml#/components/schemas/TokenPair'
         '400':
           description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '429':
+          description: Rate limit or too many attempts
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '../common/models.yaml#/components/schemas/Error'
+                  - $ref: '../common/models.yaml#/components/schemas/RetryAfter'
   /auth/refresh:
     post:
       operationId: refreshToken
@@ -54,3 +72,9 @@ paths:
             application/json:
               schema:
                 $ref: './models.yaml#/components/schemas/TokenPair'
+        '401':
+          description: Refresh token expired or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'

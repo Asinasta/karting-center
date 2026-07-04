@@ -10,16 +10,22 @@ components:
       properties:
         phone:
           type: string
+          pattern: '^\\+[1-9]\\d{7,14}$'
     VerifyOtpRequest:
       type: object
       required: [phone, code]
       properties:
         phone:
           type: string
+          pattern: '^\\+[1-9]\\d{7,14}$'
         code:
           type: string
+          minLength: 4
+          maxLength: 8
         name:
           type: string
+          minLength: 1
+          maxLength: 80
           description: Required for a new client
     TokenPair:
       type: object
@@ -31,6 +37,7 @@ components:
           type: string
         expires_in:
           type: integer
+          minimum: 1
     RefreshTokenRequest:
       type: object
       required: [refresh_token]

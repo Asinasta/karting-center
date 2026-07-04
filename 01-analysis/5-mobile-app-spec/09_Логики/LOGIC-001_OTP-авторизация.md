@@ -11,11 +11,13 @@ SCR-001.
 3. Пользователь вводит SMS-код.
 4. Клиент вызывает `verifyOtp`.
 5. Access/refresh токены сохраняются в защищённом хранилище.
+6. Если вход был начат из публичного сценария записи на слот, после авторизации клиент возвращается к выбранному слоту/форме.
+7. Смена телефона в профиле использует отдельные операции `sendPhoneChangeOtp` и `verifyPhoneChange`; старый номер остаётся активным до успеха.
 
 ## Ошибки
 
-`invalid_code`, `rate_limit`, `server_error`, `unauthorized`.
+`invalid_code`, `rate_limit`, `phone_already_used`, `server_error`, `unauthorized`.
 
 ## Flutter-заметки
 
-Токены хранить через `flutter_secure_storage` или эквивалент, не в обычном shared preferences.
+Токены хранить только в системном защищённом хранилище через согласованный Flutter-плагин, не в обычном shared preferences.
