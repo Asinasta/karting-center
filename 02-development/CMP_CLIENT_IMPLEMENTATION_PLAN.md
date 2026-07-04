@@ -1,4 +1,4 @@
-# План реализации Flutter-клиента для «Апекс»
+# План реализации клиентского приложения для «Апекс»
 
 ## Решение по реализации
 
@@ -25,6 +25,8 @@
 - Тесты: `flutter_test`, mock framework, HTTP mock adapter.
 - Линтеры: `flutter_lints` или согласованный ruleset.
 
+
+
 ## Источники для разработки
 
 - Экраны: `01-analysis/5-mobile-app-spec/*.md`.
@@ -34,42 +36,52 @@
 - API-контракт: `01-analysis/api/`.
 - BE handoff: `02-development/BE_IMPLEMENTATION_PLAN.md`.
 
+
+
 ## Экраны MVP
 
-| ID | Экран / bottom sheet | Фича |
-|---|---|---|
-| `SCR-001` | Регистрация / вход | OTP-авторизация |
-| `SCR-002` | Список заездов | Точка входа в запись |
-| `BS-001` | Фильтры | Фильтры записи |
-| `SCR-003` | Карточка заезда | Детали заезда |
-| `SCR-004` | Оформление записи | Форма бронирования |
-| `BS-002` | Успех записи | Подтверждение брони |
-| `SCR-005` | Мои записи | Список броней клиента |
-| `SCR-006` | Детали брони | Детальная карточка брони |
-| `BS-003` | Подтверждение отмены | Отмена брони |
-| `BS-004` | Карта трассы | Карта и fallback |
-| `SCR-007` | Профиль | Профиль клиента |
+
+| ID        | Экран / bottom sheet | Фича                     |
+| --------- | -------------------- | ------------------------ |
+| `SCR-001` | Регистрация / вход   | OTP-авторизация          |
+| `SCR-002` | Список заездов       | Точка входа в запись     |
+| `BS-001`  | Фильтры              | Фильтры записи           |
+| `SCR-003` | Карточка заезда      | Детали заезда            |
+| `SCR-004` | Оформление записи    | Форма бронирования       |
+| `BS-002`  | Успех записи         | Подтверждение брони      |
+| `SCR-005` | Мои записи           | Список броней клиента    |
+| `SCR-006` | Детали брони         | Детальная карточка брони |
+| `BS-003`  | Подтверждение отмены | Отмена брони             |
+| `BS-004`  | Карта трассы         | Карта и fallback         |
+| `SCR-007` | Профиль              | Профиль клиента          |
+
+
+
 
 ## API-операции
 
-| Репозиторий | operationId | Endpoint |
-|---|---|---|
-| `AuthRepository` | `sendOtp` | `POST /auth/otp` |
-| `AuthRepository` | `verifyOtp` | `POST /auth/verify` |
-| `AuthRepository` | `refreshToken` | `POST /auth/refresh` |
-| `SlotRepository` | `listSlots` | `GET /slots` без токена |
-| `SlotRepository` | `getSlot` | `GET /slots/{slotId}` без токена |
-| `MarshalRepository` | `listMarshals` | `GET /marshals` без токена |
-| `BookingRepository` | `createBooking` | `POST /bookings` |
-| `BookingRepository` | `listBookings` | `GET /bookings` |
-| `BookingRepository` | `getBooking` | `GET /bookings/{bookingId}` |
-| `BookingRepository` | `cancelBooking` | `POST /bookings/{bookingId}/cancel` |
-| `ProfileRepository` | `getProfile` | `GET /profile` |
-| `ProfileRepository` | `updateProfile` | `PATCH /profile` только имя |
-| `ProfileRepository` | `sendPhoneChangeOtp` | `POST /profile/phone-change/otp` |
-| `ProfileRepository` | `verifyPhoneChange` | `POST /profile/phone-change/verify` |
-| `ProfileRepository` | `deleteAccount` | `DELETE /profile` |
-| `ProfileRepository` | `registerPushToken` | `POST /profile/push-token` |
+
+| Репозиторий         | operationId          | Endpoint                            |
+| ------------------- | -------------------- | ----------------------------------- |
+| `AuthRepository`    | `sendOtp`            | `POST /auth/otp`                    |
+| `AuthRepository`    | `verifyOtp`          | `POST /auth/verify`                 |
+| `AuthRepository`    | `refreshToken`       | `POST /auth/refresh`                |
+| `SlotRepository`    | `listSlots`          | `GET /slots` без токена             |
+| `SlotRepository`    | `getSlot`            | `GET /slots/{slotId}` без токена    |
+| `MarshalRepository` | `listMarshals`       | `GET /marshals` без токена          |
+| `BookingRepository` | `createBooking`      | `POST /bookings`                    |
+| `BookingRepository` | `listBookings`       | `GET /bookings`                     |
+| `BookingRepository` | `getBooking`         | `GET /bookings/{bookingId}`         |
+| `BookingRepository` | `cancelBooking`      | `POST /bookings/{bookingId}/cancel` |
+| `ProfileRepository` | `getProfile`         | `GET /profile`                      |
+| `ProfileRepository` | `updateProfile`      | `PATCH /profile` только имя         |
+| `ProfileRepository` | `sendPhoneChangeOtp` | `POST /profile/phone-change/otp`    |
+| `ProfileRepository` | `verifyPhoneChange`  | `POST /profile/phone-change/verify` |
+| `ProfileRepository` | `deleteAccount`      | `DELETE /profile`                   |
+| `ProfileRepository` | `registerPushToken`  | `POST /profile/push-token`          |
+
+
+
 
 ## Структура проекта
 
@@ -103,6 +115,8 @@ client/
   integration_test/
 ```
 
+
+
 ## Архитектурные правила
 
 - Структура проекта строится по фичам.
@@ -116,6 +130,8 @@ client/
 - Хранение токенов идёт только через `SessionRepository`.
 - Ошибки API мапятся в типизированный `AppFailure`.
 - Навигация не решает бизнес-логику напрямую: protected routes вызывают auth gate и возвращаются к сохранённому return intent.
+
+
 
 ## Session model
 
@@ -133,6 +149,8 @@ class AuthenticatedSession extends SessionState {
 - `SCR-002`, `SCR-003`, `BS-001`, `BS-004` доступны гостю.
 - `SCR-004`, `SCR-005`, `SCR-006`, `SCR-007` и все мутации требуют `AuthenticatedSession`.
 - При попытке защищённого действия в гостевом режиме открывается `AuthFlow`, после успеха выполняется return intent.
+
+
 
 ## Базовые модели
 
@@ -159,7 +177,11 @@ class Money {
 - `MeetingPoint`;
 - `Pagination`.
 
+
+
 ## Доменные правила
+
+
 
 ### `AvailabilityPolicy`
 
@@ -170,6 +192,8 @@ class Money {
 - `rentalCount <= slot.freeRentalGear`.
 - Своя экипировка занимает место, но не расходует прокатную экипировку.
 
+
+
 ### `BookingPricePreviewCalculator`
 
 Правила:
@@ -177,6 +201,8 @@ class Money {
 - Предварительный расчёт: `slot.price * seatsCount + slot.rentalPrice * rentalCount`.
 - Экран созданной брони показывает `price_total` из API.
 - `price_total` из API важнее локального preview.
+
+
 
 ### `CancellationPolicy`
 
@@ -187,6 +213,8 @@ class Money {
 - `now >= startAt` означает, что отмена недоступна.
 - Клиентский preview информационный; финальный статус приходит из `cancelBooking`.
 
+
+
 ### `SlotFilterPolicy`
 
 Правила:
@@ -195,6 +223,8 @@ class Money {
 - Внутри multi-value группы используется OR.
 - Между группами используется AND.
 - Период по умолчанию: ближайшие 7 дней.
+
+
 
 ## Модель состояния
 
@@ -222,6 +252,8 @@ enum ActionStatus { idle, submitting }
 - Мутации используют `ActionStatus.submitting`.
 - Ошибки мутаций показываются через snackbar/dialog.
 - `401` один раз запускает refresh token, затем logout.
+
+
 
 ## Навигация
 
@@ -259,6 +291,8 @@ Auth gate:
 - Если гость открывает `BookingForm`, `MyRecordsTab` или `ProfileTab`, приложение открывает `AuthFlow(returnIntent)`.
 - После успешного OTP приложение возвращается к исходному действию: выбранному слоту, форме бронирования, списку записей или профилю.
 - Logout переводит сессию в `GuestSession` и оставляет пользователя в публичной части приложения.
+
+
 
 ## Сетевой слой
 
@@ -299,6 +333,8 @@ Auth gate:
 - `validation_error`;
 - `server_error`.
 
+
+
 ## Локальный кэш
 
 Использовать согласованное локальное хранилище для read-only fallback:
@@ -314,7 +350,11 @@ Auth gate:
 - Мутации в offline заблокированы.
 - Кэшированная доступность и цена не являются source of truth.
 
+
+
 ## План реализации фич
+
+
 
 ### FL-00. Каркас проекта
 
@@ -331,6 +371,8 @@ Auth gate:
 - `flutter analyze` проходит.
 - `flutter test` проходит.
 - Приложение стартует и показывает splash/session check.
+
+
 
 ### FL-01. Тема и общие UI-компоненты
 
@@ -360,6 +402,8 @@ Auth gate:
 - В feature widgets нет hardcoded colors.
 - Touch targets не меньше 44pt.
 
+
+
 ### FL-02. Авторизация `SCR-001`
 
 Сделать:
@@ -382,6 +426,8 @@ Auth gate:
 - `rate_limit` показывает сообщение о повторной попытке.
 - Вход из сценария бронирования возвращает пользователя к выбранному слоту/форме.
 
+
+
 ### FL-03. Сессия и refresh token
 
 Сделать:
@@ -403,6 +449,8 @@ Auth gate:
 - Неуспешный refresh очищает сессию.
 - Защищённые действия из guest mode открывают OTP и возвращаются к исходному действию.
 
+
+
 ### FL-04. Публичная запись: список заездов `SCR-002`
 
 Сделать:
@@ -420,6 +468,8 @@ Auth gate:
 - Карточки заездов отсортированы по `start_at`.
 - Заполненные и отменённые заезды не открывают CTA записи.
 - Экран работает без авторизации.
+
+
 
 ### FL-05. Фильтры `BS-001`
 
@@ -439,6 +489,8 @@ Auth gate:
 - Сброс возвращает период по умолчанию: ближайшие 7 дней.
 - Пустой результат фильтра показывает корректное empty state.
 
+
+
 ### FL-06. Карточка заезда `SCR-003`
 
 Сделать:
@@ -455,6 +507,8 @@ Auth gate:
 - Отменённый слот показывает disabled CTA.
 - Текстовый fallback карты работает без map key.
 - Карточка работает без авторизации.
+
+
 
 ### FL-07. Форма бронирования `SCR-004`
 
@@ -477,6 +531,8 @@ Auth gate:
 - `slot_started` блокирует запись и обновляет состояние слота.
 - Успех открывает `BS-002`.
 
+
+
 ### FL-08. Успех записи `BS-002`
 
 Сделать:
@@ -494,6 +550,8 @@ Auth gate:
 - Bottom sheet успеха показывает значения брони из API.
 - Действия навигации работают.
 - Push permission не блокирует успешное оформление брони.
+
+
 
 ### FL-09. Мои записи `SCR-005`
 
@@ -515,6 +573,8 @@ Auth gate:
 - `cancelled_by_center` видна в списке.
 - Неавторизованный пользователь попадает в auth gate, затем возвращается к списку.
 
+
+
 ### FL-10. Детали брони `SCR-006`
 
 Сделать:
@@ -531,6 +591,8 @@ Auth gate:
 - Map sheet открывается из деталей.
 - Чужая/недоступная бронь через `forbidden`/`not_found` показывает безопасный error state.
 
+
+
 ### FL-11. Подтверждение отмены `BS-003`
 
 Сделать:
@@ -545,6 +607,8 @@ Auth gate:
 - Ровно 2 часа до старта показываются как ранняя отмена.
 - Offline cancel заблокирован.
 - `already_cancelled` показывает snackbar и обновляет детали.
+
+
 
 ### FL-12. Карта трассы `BS-004`
 
@@ -561,6 +625,8 @@ Auth gate:
 - Карта работает с валидной конфигурацией.
 - Текстовый fallback работает без map key.
 - Ошибка карты не блокирует запись.
+
+
 
 ### FL-13. Профиль `SCR-007`
 
@@ -582,6 +648,8 @@ Auth gate:
 - Удаление аккаунта возвращает в auth flow после успешного ответа API.
 - Push token registration повторяется при следующей загрузке профиля/сессии после ошибки.
 
+
+
 ### FL-14. Push `LOGIC-007`
 
 Сделать:
@@ -597,6 +665,8 @@ Auth gate:
 - Granted permission регистрирует token.
 - Token refresh обновляет backend.
 - Push об отмене центром открывает детали брони.
+
+
 
 ### FL-15. Тесты и smoke flow
 
@@ -627,6 +697,8 @@ Auth gate:
   - cancel;
   - profile logout.
 
+
+
 ## Порядок реализации
 
 1. `FL-00` Каркас проекта.
@@ -646,9 +718,12 @@ Auth gate:
 15. `FL-14` Push.
 16. `FL-15` Тесты и smoke flow.
 
+
+
 ## Открытые вопросы
 
 1. Design tokens пока описаны только на уровне design brief. Перед финальной UI-реализацией нужен UI-kit export или таблица tokens.
 2. Карта может стартовать с текстового fallback + открытием внешней карты, если выбранный Flutter-плагин карт не готов.
 3. Push reminder timings `[24, 2]` остаются предположением; клиент не должен считать их финальной продуктовой правдой без API/config.
 4. Глубина offline stale cache требует решения: только memory/session cache для MVP или persistent cache между запусками.
+
