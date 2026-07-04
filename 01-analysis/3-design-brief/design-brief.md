@@ -27,12 +27,12 @@
 | BS-001 | Фильтры | Bottom Sheet | High | [BS-001-filters.md](BS-001-filters.md) |
 | SCR-003 | Карточка заезда | Экран | Critical | [SCR-003-slot-card.md](SCR-003-slot-card.md) |
 | SCR-004 | Оформление записи | Экран | Critical | [SCR-004-booking.md](SCR-004-booking.md) |
-| BS-002 | Успех записи | Экран / Bottom Sheet | High | [BS-002-booking-success.md](BS-002-booking-success.md) |
-| SCR-005 | Мои бронирования | Экран | Critical | [SCR-005-my-bookings.md](SCR-005-my-bookings.md) |
+| BS-002 | Успех записи | Bottom Sheet | High | [BS-002-booking-success.md](BS-002-booking-success.md) |
+| SCR-005 | Мои записи | Экран | Critical | [SCR-005-my-bookings.md](SCR-005-my-bookings.md) |
 | SCR-006 | Детали брони | Экран | Critical | [SCR-006-booking-details.md](SCR-006-booking-details.md) |
 | BS-003 | Подтверждение отмены | Bottom Sheet | High | [BS-003-cancel-confirm.md](BS-003-cancel-confirm.md) |
-| BS-004 | Карта трассы | Bottom Sheet | Medium | [BS-004-track-map.md](BS-004-track-map.md) |
-| SCR-007 | Профиль клиента | Экран | Medium | [SCR-007-profile.md](SCR-007-profile.md) |
+| BS-004 | Карта трассы | Bottom Sheet | High | [BS-004-track-map.md](BS-004-track-map.md) |
+| SCR-007 | Профиль | Экран | Medium | [SCR-007-profile.md](SCR-007-profile.md) |
 
 ## Основные сценарии
 
@@ -46,7 +46,7 @@ flowchart TD
   SCR002 --> SCR003[SCR-003 Карточка]
   SCR003 --> SCR004[SCR-004 Оформление]
   SCR004 --> BS002[BS-002 Успех]
-  SCR002 --> SCR005[SCR-005 Мои брони]
+  SCR002 --> SCR005[SCR-005 Мои записи]
   SCR005 --> SCR006[SCR-006 Детали]
   SCR006 --> BS003[BS-003 Отмена]
   SCR003 --> BS004[BS-004 Карта]

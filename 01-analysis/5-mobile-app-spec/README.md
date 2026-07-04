@@ -25,7 +25,7 @@
 | SCR-003 | Карточка заезда | [SCR-003-slot-card.md](SCR-003-slot-card.md) |
 | SCR-004 | Оформление записи | [SCR-004-booking.md](SCR-004-booking.md) |
 | BS-002 | Успех записи | [BS-002-booking-success.md](BS-002-booking-success.md) |
-| SCR-005 | Мои бронирования | [SCR-005-my-bookings.md](SCR-005-my-bookings.md) |
+| SCR-005 | Мои записи | [SCR-005-my-bookings.md](SCR-005-my-bookings.md) |
 | SCR-006 | Детали брони | [SCR-006-booking-details.md](SCR-006-booking-details.md) |
 | BS-003 | Подтверждение отмены | [BS-003-cancel-confirm.md](BS-003-cancel-confirm.md) |
 | BS-004 | Карта трассы | [BS-004-track-map.md](BS-004-track-map.md) |

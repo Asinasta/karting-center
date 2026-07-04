@@ -31,3 +31,9 @@ components:
           type: string
         expires_in:
           type: integer
+    RefreshTokenRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string

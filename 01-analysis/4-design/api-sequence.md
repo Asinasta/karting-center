@@ -7,6 +7,7 @@
 - Все защищённые запросы используют `Authorization: Bearer <access_token>`.
 - При `401` Flutter-клиент пытается обновить access token по refresh token.
 - Создание брони всегда отправляется с `Idempotency-Key`.
+- `createBooking` передаёт выбранные места массивом `seat_gear[]`; `seats_count` вычисляется сервером как длина массива.
 - Сервер — источник истины по местам, прокатной экипировке, цене и времени.
 
 ## Сценарий 1: Создание брони
@@ -19,7 +20,7 @@ sequenceDiagram
 
   User->>App: Нажимает «Записаться»
   App->>App: Генерирует Idempotency-Key
-  App->>API: POST /bookings {slot_id, seats_count, seat_gear[]} + Bearer + Idempotency-Key
+  App->>API: POST /bookings {slot_id, seat_gear[]} + Bearer + Idempotency-Key
   API->>API: Проверяет места, прокатную экипировку, статус слота
   alt Успех
     API-->>App: 201 Booking {status: active, price_total}

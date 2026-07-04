@@ -48,7 +48,7 @@
 | meeting_point | string | Место сбора |
 | meeting_point_lat | float | Широта |
 | meeting_point_lng | float | Долгота |
-| status | enum (`scheduled`, `cancelled`) | Статус слота |
+| status | enum (`scheduled`, `cancelled`) | Статус слота; `cancelled` означает отмену центром |
 | cancel_reason | string? | Причина отмены центром |
 
 ### Booking
@@ -58,8 +58,8 @@
 | id | UUID | Идентификатор брони |
 | client_id | UUID | Владелец брони |
 | slot | Slot | Слот |
-| seats_count | int | Число мест, 1–3 |
-| rental_count | int | Число прокатных комплектов |
+| seats_count | int | Число мест, 1–3; лимит 3 — предположение/R-013 |
+| rental_count | int | Число прокатных комплектов, не больше числа мест |
 | seat_gear | array enum (`own`, `rental`) | Выбор экипировки по каждому месту |
 | price_total | money RUB | Итоговая цена из API |
 | status | enum | Статус брони |
@@ -119,7 +119,7 @@ erDiagram
 
 ## Правила
 
-- `seats_count <= min(slot.free_seats, slot.track_config.capacity_cap, 3)`.
+- `seats_count <= min(slot.free_seats, slot.track_config.capacity_cap, 3)`, где лимит 3 — предположение/R-013.
 - `rental_count <= slot.free_rental_gear`.
 - `price_total` рассчитывает сервер.
 - Клиент не изменяет `Slot`, `TrackConfig`, `Marshal`.

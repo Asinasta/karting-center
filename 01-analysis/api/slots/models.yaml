@@ -20,6 +20,7 @@ components:
           enum: [novice, experienced]
         capacity_cap:
           type: integer
+          description: Capacity cap supplied by the backend. Experienced cap up to 14 is an MVP assumption, not a client-side constant.
         duration_min:
           type: integer
         geometry:
@@ -61,5 +62,6 @@ components:
         status:
           type: string
           enum: [scheduled, cancelled]
+          description: Slot lifecycle status. `cancelled` means the center cancelled the slot; client-side early cancellation uses Booking.status `cancelled`.
         cancel_reason:
           type: string

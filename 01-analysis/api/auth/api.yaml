@@ -41,6 +41,12 @@ paths:
     post:
       operationId: refreshToken
       summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/RefreshTokenRequest'
       responses:
         '200':
           description: Token pair

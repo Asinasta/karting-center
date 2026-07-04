@@ -32,8 +32,8 @@ flowchart TD
 | F-003 | Фильтры | Must | `listSlots`, `listMarshals` |
 | F-004 | Карточка заезда | Must | `getSlot` |
 | F-005 | Создание брони | Must | `createBooking` |
-| F-006 | Мои брони | Must | `listBookings` |
+| F-006 | Мои записи | Must | `listBookings` |
 | F-007 | Отмена брони | Must | `cancelBooking` |
 | F-008 | Профиль | Must | `getProfile`, `updateProfile`, `deleteAccount` |
 | F-009 | Push | Should | `registerPushToken` |
-| F-010 | Карта трассы | Should | данные `geometry`, `meeting_point` |
+| F-010 | Карта трассы | Must | данные `geometry`, `meeting_point` |
