@@ -7,11 +7,13 @@ Flutter MVP-клиент для картинг-центра «Апекс».
 Если папка `client/` уже создана из репозитория, сначала подтяни зависимости:
 
 ```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\client
-flutter pub get
-flutter analyze
-flutter test
+cd C:\Users\azari\karting-center\client
+.\check.ps1
 ```
+
+Или по шагам: `flutter pub get`, `flutter analyze`, `flutter test`.
+
+Нужен **Dart 3.9+** (`flutter upgrade`, если `flutter --version` показывает меньше).
 
 Если Flutter попросит платформенные файлы (`android/`, `web/`, `.metadata`), сгенерируй их внутри `client/`:
 
@@ -27,7 +29,7 @@ flutter pub get
 Перед запуском клиента подними FastAPI:
 
 ```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\backend
+cd C:\Users\azari\karting-center\backend
 .\.venv\Scripts\python.exe manage.py run
 ```
 

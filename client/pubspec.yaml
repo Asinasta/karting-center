@@ -4,7 +4,8 @@ publish_to: "none"
 version: 0.1.0+1
 
 environment:
-  sdk: ">=3.6.0 <4.0.0"
+  # go_router 17.x requires Dart 3.9+ (Flutter 3.32+).
+  sdk: ">=3.9.0 <4.0.0"
 
 dependencies:
   flutter:
