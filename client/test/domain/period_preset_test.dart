@@ -35,6 +35,12 @@ void main() {
     expect(range.to, DateTime(2026, 8, 4, 23, 59, 59));
   });
 
+  test('next7Days preset spans seven days from now', () {
+    final range = rangeForPreset(PeriodPreset.next7Days, now);
+    expect(range.from, now);
+    expect(range.to, now.add(const Duration(days: 7)));
+  });
+
   test('detectPreset treats missing dates as next7Days default', () {
     expect(detectPreset(null, null, now), PeriodPreset.next7Days);
 

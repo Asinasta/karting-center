@@ -514,9 +514,8 @@ class FixturesAdapter(Backend):
             date_from = filters.date_from
             date_to = filters.date_to
             if date_from is None and date_to is None:
-                catalog_start, catalog_end = _catalog_range()
-                date_from = now if now > catalog_start else catalog_start
-                date_to = catalog_end
+                date_from = now
+                date_to = now + timedelta(days=7)
 
             result: list[SlotRecord] = []
             for s in self._slots.values():

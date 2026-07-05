@@ -32,9 +32,7 @@ DateTime startOfDay(DateTime value) =>
 DateTime endOfDay(DateTime value) =>
     DateTime(value.year, value.month, value.day, 23, 59, 59);
 
-/// Maps a preset to [from, to] using [now] as the reference instant.
-///
-/// [PeriodPreset.next7Days] and [PeriodPreset.custom] have no fixed range here.
+/// [PeriodPreset.next7Days] — from [now] through now + 7 days (LOGIC-005 / R-027).
 PeriodRange rangeForPreset(PeriodPreset preset, DateTime now) {
   final today = startOfDay(now);
 
@@ -45,7 +43,7 @@ PeriodRange rangeForPreset(PeriodPreset preset, DateTime now) {
       final day = today.add(const Duration(days: 1));
       return PeriodRange(from: day, to: endOfDay(day));
     case PeriodPreset.next7Days:
-      throw ArgumentError('next7Days uses server default (no explicit dates)');
+      return PeriodRange(from: now, to: now.add(const Duration(days: 7)));
     case PeriodPreset.thisWeekend:
       return _thisWeekendRange(today, now.weekday);
     case PeriodPreset.rollingMonth:
@@ -99,7 +97,8 @@ PeriodPreset detectPreset(DateTime? dateFrom, DateTime? dateTo, DateTime now) {
 
 /// Converts UI preset + optional custom bounds into API filter fields.
 ///
-/// [PeriodPreset.next7Days] omits dates so the backend applies its 7-day default.
+/// [PeriodPreset.next7Days] omits dates so the backend applies its 7-day default
+/// from the current instant (LOGIC-005 / R-027).
 ({DateTime? dateFrom, DateTime? dateTo}) presetToFilterDates({
   required PeriodPreset preset,
   DateTime? customFrom,

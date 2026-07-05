@@ -13,7 +13,7 @@ from app.domain.clock import FixedClock
 from app.main import create_app
 
 SEED_PHONE = "+79990000000"
-FIXED_NOW = datetime(2026, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+FIXED_NOW = datetime(2026, 7, 5, 6, 15, 0, tzinfo=timezone.utc)  # 09:15 MSK, before first slot
 
 
 @pytest.fixture

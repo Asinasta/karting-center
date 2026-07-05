@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from .conftest import get_slots, pick_available_slot, pick_cancelled_slot
 
 
@@ -12,6 +14,22 @@ def test_list_slots_sorted_by_start(client):
     slots = get_slots(client)
     starts = [s["start_at"] for s in slots]
     assert starts == sorted(starts)
+
+
+def test_default_period_is_seven_days(client, clock):
+    week = get_slots(client)
+    assert week, "fixtures should expose slots within the default week window"
+    for slot in week:
+        start = datetime.fromisoformat(slot["start_at"])
+        assert start >= clock.now()
+        assert start <= clock.now() + timedelta(days=7)
+
+    extended = get_slots(
+        client,
+        date_from=clock.now().isoformat(),
+        date_to=(clock.now() + timedelta(days=30)).isoformat(),
+    )
+    assert len(extended) > len(week)
 
 
 def test_only_available_hides_full_and_cancelled(client):
