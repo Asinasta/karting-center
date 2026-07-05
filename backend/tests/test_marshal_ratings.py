@@ -35,6 +35,20 @@ def test_rate_marshal_on_completed_booking(client):
     assert patched["marshal_rating"]["stars"] == 4
     assert patched["marshal_rating"]["comment"] == "Обновлённый комментарий"
 
+    deleted = client.delete(
+        f"/bookings/{booking['id']}/marshal-rating",
+        headers=headers,
+    )
+    assert deleted.status_code == 200, deleted.text
+    assert deleted.json().get("marshal_rating") is None
+
+    recreated = client.post(
+        f"/bookings/{booking['id']}/marshal-rating",
+        json={"stars": 3},
+        headers=headers,
+    )
+    assert recreated.status_code == 200, recreated.text
+
     duplicate = client.post(
         f"/bookings/{booking['id']}/marshal-rating",
         json={"stars": 4},

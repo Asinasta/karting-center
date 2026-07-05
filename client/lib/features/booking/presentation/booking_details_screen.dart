@@ -106,6 +106,26 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     }
   }
 
+  Future<void> _deleteRating(Booking booking) async {
+    setState(() => _ratingAction = ActionStatus.submitting);
+    try {
+      final updated =
+          await AppScope.of(context).bookingRepository.deleteMarshalRating(
+                booking.id,
+              );
+      if (!mounted) return;
+      setState(() {
+        _state = Content(updated);
+        _ratingAction = ActionStatus.idle;
+      });
+      showAppSnack(context, 'Оценка удалена');
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() => _ratingAction = ActionStatus.idle);
+      showFailureSnack(context, toAppFailure(error));
+    }
+  }
+
   void _openMap(Booking booking) {
     final slot = booking.slot;
     showTrackMapSheet(
@@ -250,6 +270,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
               canEdit: canEditRating,
               submitting: _ratingAction == ActionStatus.submitting,
               onSubmit: (stars, comment) => _submitRating(booking, stars, comment),
+              onDelete: canEditRating ? () => _deleteRating(booking) : null,
             ),
           if (canRate || canEditRating || booking.marshalRating != null)
             const SizedBox(height: ApexSpacing.lg),

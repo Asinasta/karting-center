@@ -31,6 +31,9 @@ abstract class BookingRepository {
     required int stars,
     String? comment,
   });
+
+  /// `deleteMarshalRating`: DELETE /bookings/{bookingId}/marshal-rating
+  Future<Booking> deleteMarshalRating(String bookingId);
 }
 
 class ApiBookingRepository implements BookingRepository {
@@ -109,6 +112,15 @@ class ApiBookingRepository implements BookingRepository {
         'stars': stars,
         if (comment != null && comment.isNotEmpty) 'comment': comment,
       },
+      authorized: true,
+    );
+    return Booking.fromJson(payload! as Map<String, Object?>);
+  }
+
+  @override
+  Future<Booking> deleteMarshalRating(String bookingId) async {
+    final payload = await _apiClient.delete(
+      '/bookings/$bookingId/marshal-rating',
       authorized: true,
     );
     return Booking.fromJson(payload! as Map<String, Object?>);

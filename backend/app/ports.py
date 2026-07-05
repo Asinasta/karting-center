@@ -102,6 +102,11 @@ class BookingPort(ABC):
         now: datetime,
     ) -> Booking: ...
 
+    @abstractmethod
+    def delete_marshal_rating(
+        self, client_id: UUID, booking_id: UUID, now: datetime
+    ) -> Booking: ...
+
 
 class ProfilePort(ABC):
     @abstractmethod

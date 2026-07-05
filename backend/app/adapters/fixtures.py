@@ -792,6 +792,26 @@ class FixturesAdapter(Backend):
             existing.comment = req.comment
             return self._booking_contract(record)
 
+    def delete_marshal_rating(
+        self, client_id: UUID, booking_id: UUID, now: datetime
+    ) -> Booking:
+        with self._lock:
+            record = self._owned_booking(client_id, booking_id)
+            if booking_id not in self._marshal_ratings:
+                raise ApiError("not_found", "Marshal rating not found for this booking")
+            if not can_rate_marshal(
+                status=record.status,
+                start_at=record.slot_snapshot.start_at,
+                now=now,
+            ):
+                raise ApiError(
+                    "rating_not_eligible",
+                    "Booking is not eligible for marshal rating",
+                )
+
+            del self._marshal_ratings[booking_id]
+            return self._booking_contract(record)
+
     # ---------------------------------------------------------- ProfilePort
     def get_profile(self, client_id: UUID) -> Profile:
         with self._lock:

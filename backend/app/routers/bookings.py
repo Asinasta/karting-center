@@ -84,3 +84,17 @@ def updateMarshalRating(  # noqa: N802
     now: datetime = Depends(get_now),
 ) -> Booking:
     return backend.update_marshal_rating(client_id, booking_id, body, now)
+
+
+@router.delete(
+    "/bookings/{booking_id}/marshal-rating",
+    operation_id="deleteMarshalRating",
+    response_model=Booking,
+)
+def deleteMarshalRating(  # noqa: N802
+    booking_id: UUID,
+    client_id: UUID = Depends(get_current_client_id),
+    backend: Backend = Depends(get_backend),
+    now: datetime = Depends(get_now),
+) -> Booking:
+    return backend.delete_marshal_rating(client_id, booking_id, now)
