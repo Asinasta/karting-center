@@ -80,6 +80,23 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
+  void _goBackToCode() {
+    setState(() {
+      _step = _AuthStep.code;
+      _nameController.clear();
+      _consentAccepted = false;
+      _inlineError = null;
+    });
+  }
+
+  void _goBack() {
+    if (_step == _AuthStep.register) {
+      _goBackToCode();
+    } else {
+      _resetToPhone();
+    }
+  }
+
   Future<void> _sendOtp() async {
     if (!_isPhoneValid) {
       setState(() => _inlineError = 'Введите телефон в формате +79991234567');
@@ -199,11 +216,17 @@ class _AuthScreenState extends State<AuthScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_step == _AuthStep.register ? 'Регистрация' : 'Вход'),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          tooltip: 'К заездам',
-          onPressed: () => context.go('/slots'),
-        ),
+        leading: _step == _AuthStep.phone
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'К заездам',
+                onPressed: () => context.go('/slots'),
+              )
+            : IconButton(
+                icon: const Icon(Icons.arrow_back),
+                tooltip: 'Назад',
+                onPressed: submitting ? null : _goBack,
+              ),
       ),
       body: SafeArea(
         child: ListView(
@@ -304,22 +327,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       : 'Отправить код ещё раз',
                 ),
               ),
-              const SizedBox(height: ApexSpacing.sm),
-              OutlinedButton(
-                onPressed: submitting ? null : _resetToPhone,
-                style: ApexButtonStyles.outlinedRed,
-                child: const Text('Изменить номер'),
-              ),
             ] else ...[
               FilledButton(
                 onPressed: submitting ? null : _submitRegistration,
                 child: Text(submitting ? 'Регистрируем…' : 'Зарегистрироваться'),
-              ),
-              const SizedBox(height: ApexSpacing.sm),
-              OutlinedButton(
-                onPressed: submitting ? null : _resetToPhone,
-                style: ApexButtonStyles.outlinedRed,
-                child: const Text('Изменить номер'),
               ),
             ],
           ],

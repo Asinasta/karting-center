@@ -186,9 +186,9 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
+                    OutlinedButton(
                       onPressed: widget.submitting ? null : _startEditing,
-                      style: ApexButtonStyles.textRed,
+                      style: ApexButtonStyles.outlinedRed,
                       child: const Text('Изменить'),
                     ),
                     if (widget.onDelete != null) ...[
