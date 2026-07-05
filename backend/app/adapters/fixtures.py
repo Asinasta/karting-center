@@ -135,15 +135,15 @@ class FixturesAdapter(Backend):
 
         marshals = [marshal_a, marshal_b, marshal_c, marshal_d, marshal_e]
 
-        # --- Catalog: 10–20 July 2026, 12:00–20:00 every 15 minutes (MSK). ---
+        # --- Catalog: 10–20 July 2026, 12:00–16:00 every 15 minutes (MSK). ---
         slot_available: SlotRecord | None = None
         slot_cancelled: SlotRecord | None = None
         catalog_slots: list[SlotRecord] = []
 
         for day in range(CATALOG_DAY_FROM, CATALOG_DAY_TO + 1):
-            for hour in range(12, 21):
+            for hour in range(12, 17):
                 for minute in CATALOG_SLOT_MINUTES:
-                    if hour == 20 and minute > 0:
+                    if hour == 16 and minute > 0:
                         continue
 
                     start_at = _catalog_moment(day, hour, minute)
@@ -185,7 +185,7 @@ class FixturesAdapter(Backend):
                         meeting_lat, meeting_lng = None, None
                         status = "scheduled"
                         cancel_reason = None
-                    elif key == (13, 16, 45):
+                    elif key == (13, 15, 45):
                         track = experienced
                         marshal = marshal_d
                         total_seats = 14
