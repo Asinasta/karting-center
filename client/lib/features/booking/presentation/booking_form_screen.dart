@@ -211,6 +211,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final bookable = slot.isAvailable && maxSeats > 0;
     final submitting = _action == ActionStatus.submitting;
     final maxRental = min(_totalSeats, slot.freeRentalGear);
+    final minOwn = _totalSeats - maxRental;
     final ownCount = _totalSeats - _rentalCount;
 
     final preview = BookingPricePreviewCalculator.preview(
@@ -306,7 +307,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   _CounterRow(
                     label: 'Своя экипировка',
                     value: ownCount,
-                    min: 0,
+                    min: minOwn,
                     max: _totalSeats,
                     enabled: !submitting,
                     onChanged: (own) =>
@@ -344,6 +345,14 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                 ),
             ],
           ),
+          if (minOwn > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: ApexSpacing.xs),
+              child: Text(
+                'При $maxRental прокатных комплектах минимум своих — $minOwn.',
+                style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+              ),
+            ),
           if (slot.freeRentalGear == 0)
             Padding(
               padding: const EdgeInsets.only(top: ApexSpacing.xs),
