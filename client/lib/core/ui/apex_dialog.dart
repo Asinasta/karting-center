@@ -175,6 +175,7 @@ class _DialogActionButton extends StatelessWidget {
         ),
       ApexDialogActionKind.secondary => OutlinedButton(
           onPressed: onPressed,
+          style: ApexButtonStyles.outlinedRed,
           child: Text(action.label),
         ),
       ApexDialogActionKind.destructive => FilledButton(

@@ -127,12 +127,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Выйти из аккаунта?'),
         content: const Text('Вы сможете войти снова по номеру телефона.'),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(context).pop(false),
+            style: ApexButtonStyles.outlinedRed,
             child: const Text('Отмена'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
+            style: ApexButtonStyles.filledRed,
             child: const Text('Выйти'),
           ),
         ],
@@ -160,13 +162,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'Действие необратимо.',
         ),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(context).pop(false),
+            style: ApexButtonStyles.outlinedRed,
             child: const Text('Отмена'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: ApexColors.trackRed),
             onPressed: () => Navigator.of(context).pop(true),
+            style: ApexButtonStyles.filledRed,
             child: const Text('Удалить'),
           ),
         ],
@@ -312,16 +315,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         const SizedBox(height: ApexSpacing.lg),
-        OutlinedButton.icon(
-          onPressed: disabled ? null : _logout,
-          icon: const Icon(Icons.logout),
-          label: const Text('Выйти'),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: disabled ? null : _logout,
+            style: ApexButtonStyles.filledRed,
+            icon: const Icon(Icons.logout),
+            label: const Text('Выйти'),
+          ),
         ),
         const SizedBox(height: ApexSpacing.sm),
-        TextButton(
-          onPressed: disabled ? null : _deleteAccount,
-          style: TextButton.styleFrom(foregroundColor: ApexColors.trackRed),
-          child: const Text('Удалить аккаунт'),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: disabled ? null : _deleteAccount,
+            style: ApexButtonStyles.outlinedRed,
+            child: const Text('Удалить аккаунт'),
+          ),
         ),
         const SizedBox(height: ApexSpacing.lg),
       ],

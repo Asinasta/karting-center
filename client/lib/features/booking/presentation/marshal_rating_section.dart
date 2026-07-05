@@ -78,15 +78,14 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
         title: const Text('Удалить оценку?'),
         content: const Text('После удаления можно будет поставить новую оценку.'),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(context).pop(false),
+            style: ApexButtonStyles.outlinedRed,
             child: const Text('Отмена'),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: ApexColors.trackRed,
-            ),
+            style: ApexButtonStyles.filledRed,
             child: const Text('Удалить'),
           ),
         ],
@@ -144,24 +143,25 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
                 ),
               ),
               const SizedBox(height: ApexSpacing.sm),
-              Wrap(
-                spacing: ApexSpacing.sm,
-                runSpacing: ApexSpacing.xs,
-                crossAxisAlignment: WrapCrossAlignment.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   if (_editing) ...[
-                    TextButton(
+                    OutlinedButton(
                       onPressed: widget.submitting
                           ? null
                           : () => setState(() {
                                 _editing = false;
                                 _syncFromRating(widget.rating);
                               }),
+                      style: ApexButtonStyles.outlinedRed,
                       child: const Text('Отмена'),
                     ),
+                    const SizedBox(width: ApexSpacing.sm),
                   ],
                   FilledButton(
                     onPressed: widget.submitting ? null : _submit,
+                    style: ApexButtonStyles.filledRed,
                     child: Text(
                       widget.submitting
                           ? 'Сохраняем…'
@@ -183,21 +183,22 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
               ],
               if (widget.canEdit) ...[
                 const SizedBox(height: ApexSpacing.sm),
-                Wrap(
-                  spacing: ApexSpacing.sm,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                       onPressed: widget.submitting ? null : _startEditing,
+                      style: ApexButtonStyles.textRed,
                       child: const Text('Изменить'),
                     ),
-                    if (widget.onDelete != null)
-                      TextButton(
+                    if (widget.onDelete != null) ...[
+                      const SizedBox(width: ApexSpacing.sm),
+                      OutlinedButton(
                         onPressed: widget.submitting ? null : _confirmDelete,
-                        style: TextButton.styleFrom(
-                          foregroundColor: ApexColors.trackRed,
-                        ),
+                        style: ApexButtonStyles.outlinedRed,
                         child: const Text('Удалить'),
                       ),
+                    ],
                   ],
                 ),
               ],

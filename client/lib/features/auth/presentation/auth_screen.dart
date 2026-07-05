@@ -304,8 +304,10 @@ class _AuthScreenState extends State<AuthScreen> {
                       : 'Отправить код ещё раз',
                 ),
               ),
-              TextButton(
+              const SizedBox(height: ApexSpacing.sm),
+              OutlinedButton(
                 onPressed: submitting ? null : _resetToPhone,
+                style: ApexButtonStyles.outlinedRed,
                 child: const Text('Изменить номер'),
               ),
             ] else ...[
@@ -314,8 +316,9 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: Text(submitting ? 'Регистрируем…' : 'Зарегистрироваться'),
               ),
               const SizedBox(height: ApexSpacing.sm),
-              TextButton(
+              OutlinedButton(
                 onPressed: submitting ? null : _resetToPhone,
+                style: ApexButtonStyles.outlinedRed,
                 child: const Text('Изменить номер'),
               ),
             ],

@@ -36,3 +36,21 @@ class ApexTouchTarget {
 
   static const double min = 44;
 }
+
+class ApexButtonStyles {
+  const ApexButtonStyles._();
+
+  static ButtonStyle get filledRed => FilledButton.styleFrom(
+        backgroundColor: ApexColors.trackRed,
+        foregroundColor: Colors.white,
+      );
+
+  static ButtonStyle get outlinedRed => OutlinedButton.styleFrom(
+        foregroundColor: ApexColors.trackRed,
+        side: const BorderSide(color: ApexColors.trackRed),
+      );
+
+  static ButtonStyle get textRed => TextButton.styleFrom(
+        foregroundColor: ApexColors.trackRed,
+      );
+}
