@@ -69,3 +69,17 @@ def cancellation_kind(start_at: datetime, now: datetime) -> str:
     Caller must handle the already-started case before calling this.
     """
     return "early" if (start_at - now) >= CANCEL_THRESHOLD else "late"
+
+
+_CANCELLED_BOOKING_STATUSES = frozenset(
+    {"cancelled", "late_cancel", "cancelled_by_center"}
+)
+
+
+def can_rate_marshal(*, status: str, start_at: datetime, now: datetime) -> bool:
+    """LOGIC-006: rating is allowed after the ride for non-cancelled bookings."""
+    if status in _CANCELLED_BOOKING_STATUSES:
+        return False
+    if status not in {"active", "completed"}:
+        return False
+    return now >= start_at

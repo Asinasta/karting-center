@@ -244,4 +244,63 @@ void main() {
       );
     });
   });
+
+  group('RatingPolicy', () {
+    final startAt = DateTime.utc(2026, 7, 10, 12);
+    final now = DateTime.utc(2026, 7, 10, 13);
+
+    test('allows rating after start for completed booking without rating', () {
+      expect(
+        RatingPolicy.canRate(
+          _booking(status: BookingStatus.completed, startAt: startAt),
+          now,
+        ),
+        isTrue,
+      );
+    });
+
+    test('blocks rating before start and when already rated', () {
+      expect(
+        RatingPolicy.canRate(
+          _booking(status: BookingStatus.active, startAt: startAt.add(const Duration(hours: 1))),
+          now,
+        ),
+        isFalse,
+      );
+      expect(
+        RatingPolicy.canRate(
+          Booking(
+            id: 'booking-1',
+            slot: BookingSlotSnapshot(
+              id: 'slot-1',
+              trackConfig: const TrackConfig(
+                id: 'track-1',
+                name: 'Test track',
+                type: TrackConfigType.novice,
+                capacityCap: 8,
+              ),
+              marshal: const Marshal(id: 'marshal-1', name: 'Иван'),
+              startAt: startAt,
+              price: const Money(amount: 150000, currency: 'RUB'),
+              rentalPrice: const Money(amount: 50000, currency: 'RUB'),
+              meetingPoint: 'Главный вход',
+              status: SlotStatus.scheduled,
+            ),
+            seatsCount: 1,
+            rentalCount: 0,
+            seatGear: const [GearChoice.own],
+            priceTotal: const Money(amount: 150000, currency: 'RUB'),
+            status: BookingStatus.completed,
+            createdAt: DateTime.utc(2026),
+            marshalRating: MarshalRating(
+              stars: 5,
+              createdAt: DateTime.utc(2026, 7, 10, 14),
+            ),
+          ),
+          now,
+        ),
+        isFalse,
+      );
+    });
+  });
 }

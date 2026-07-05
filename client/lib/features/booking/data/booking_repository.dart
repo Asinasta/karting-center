@@ -17,6 +17,13 @@ abstract class BookingRepository {
 
   /// `cancelBooking`: POST /bookings/{bookingId}/cancel
   Future<Booking> cancelBooking(String bookingId);
+
+  /// `rateMarshal`: POST /bookings/{bookingId}/marshal-rating
+  Future<Booking> rateMarshal({
+    required String bookingId,
+    required int stars,
+    String? comment,
+  });
 }
 
 class ApiBookingRepository implements BookingRepository {
@@ -63,6 +70,23 @@ class ApiBookingRepository implements BookingRepository {
   Future<Booking> cancelBooking(String bookingId) async {
     final payload =
         await _apiClient.post('/bookings/$bookingId/cancel', authorized: true);
+    return Booking.fromJson(payload! as Map<String, Object?>);
+  }
+
+  @override
+  Future<Booking> rateMarshal({
+    required String bookingId,
+    required int stars,
+    String? comment,
+  }) async {
+    final payload = await _apiClient.post(
+      '/bookings/$bookingId/marshal-rating',
+      body: {
+        'stars': stars,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      },
+      authorized: true,
+    );
     return Booking.fromJson(payload! as Map<String, Object?>);
   }
 }

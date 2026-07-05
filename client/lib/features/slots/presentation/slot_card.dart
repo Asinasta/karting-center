@@ -4,6 +4,14 @@ import '../../../core/theme/apex_tokens.dart';
 import '../../../core/ui/formats.dart';
 import '../domain/slot_models.dart';
 
+String _marshalChipLabel(Slot slot) {
+  final rating = slot.marshal.ratingLabel;
+  if (rating == null) {
+    return slot.marshal.name;
+  }
+  return '${slot.marshal.name} · $rating';
+}
+
 class SlotCard extends StatelessWidget {
   const SlotCard({
     required this.slot,
@@ -59,7 +67,7 @@ class SlotCard extends StatelessWidget {
                     icon: Icons.flag_outlined,
                     label: slot.trackConfig.type.label,
                   ),
-                  ChipText(icon: Icons.person_outline, label: slot.marshal.name),
+                  ChipText(icon: Icons.person_outline, label: _marshalChipLabel(slot)),
                   ChipText(
                     icon: Icons.event_seat_outlined,
                     label: 'Мест: ${slot.freeSeats}',

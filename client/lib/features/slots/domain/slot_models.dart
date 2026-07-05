@@ -7,17 +7,33 @@ class Marshal {
   const Marshal({
     required this.id,
     required this.name,
+    this.averageRating,
+    this.ratingCount = 0,
   });
 
   factory Marshal.fromJson(Map<String, Object?> json) {
     return Marshal(
       id: json['id'] as String,
       name: json['name'] as String,
+      averageRating: (json['average_rating'] as num?)?.toDouble(),
+      ratingCount: json['rating_count'] as int? ?? 0,
     );
   }
 
   final String id;
   final String name;
+  final double? averageRating;
+  final int ratingCount;
+
+  String? get ratingLabel {
+    if (ratingCount <= 0 || averageRating == null) {
+      return null;
+    }
+    final formatted = averageRating! % 1 == 0
+        ? averageRating!.toStringAsFixed(0)
+        : averageRating!.toStringAsFixed(1);
+    return '★ $formatted ($ratingCount)';
+  }
 }
 
 enum TrackConfigType {

@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
-from .contracts.bookings import Booking, BookingList, CreateBookingRequest
+from .contracts.bookings import Booking, BookingList, CreateBookingRequest, CreateMarshalRatingRequest
 from .contracts.marshals import Marshal
 from .contracts.profile import Profile
 from .contracts.slots import Slot
@@ -83,6 +83,15 @@ class BookingPort(ABC):
 
     @abstractmethod
     def cancel_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking: ...
+
+    @abstractmethod
+    def rate_marshal(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking: ...
 
 
 class ProfilePort(ABC):

@@ -28,6 +28,8 @@ components:
             - forbidden
             - not_found
             - validation_error
+            - already_rated
+            - rating_not_eligible
             - server_error
         message:
           type: string

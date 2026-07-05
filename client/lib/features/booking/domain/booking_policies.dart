@@ -101,3 +101,22 @@ BookingGroup groupBooking(Booking booking, DateTime now) {
   }
   return BookingGroup.upcoming;
 }
+
+/// RatingPolicy (LOGIC-006).
+class RatingPolicy {
+  const RatingPolicy._();
+
+  static bool canRate(Booking booking, DateTime now) {
+    if (booking.marshalRating != null) {
+      return false;
+    }
+    if (booking.status.isCancelledKind) {
+      return false;
+    }
+    if (booking.status != BookingStatus.active &&
+        booking.status != BookingStatus.completed) {
+      return false;
+    }
+    return !now.isBefore(booking.slot.startAt);
+  }
+}

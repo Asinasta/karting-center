@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, Query
 
-from ..contracts.bookings import Booking, BookingList, CreateBookingRequest
+from ..contracts.bookings import Booking, BookingList, CreateBookingRequest, CreateMarshalRatingRequest
 from ..dependencies import get_backend, get_current_client_id, get_now
 from ..ports import Backend
 
@@ -54,3 +54,18 @@ def cancelBooking(  # noqa: N802
     now: datetime = Depends(get_now),
 ) -> Booking:
     return backend.cancel_booking(client_id, booking_id, now)
+
+
+@router.post(
+    "/bookings/{booking_id}/marshal-rating",
+    operation_id="rateMarshal",
+    response_model=Booking,
+)
+def rateMarshal(  # noqa: N802
+    booking_id: UUID,
+    body: CreateMarshalRatingRequest,
+    client_id: UUID = Depends(get_current_client_id),
+    backend: Backend = Depends(get_backend),
+    now: datetime = Depends(get_now),
+) -> Booking:
+    return backend.rate_marshal(client_id, booking_id, body, now)

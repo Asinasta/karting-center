@@ -13,6 +13,7 @@ import '../domain/booking_models.dart';
 import '../domain/booking_policies.dart';
 import 'booking_list_screen.dart' show BookingStatusLabel;
 import 'cancel_confirm_sheet.dart';
+import 'marshal_rating_section.dart';
 
 /// SCR-006 — Детали брони (FL-10). Shows the slot snapshot, not live slot.
 class BookingDetailsScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class BookingDetailsScreen extends StatefulWidget {
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   LoadState<Booking> _state = const Loading();
+  ActionStatus _ratingAction = ActionStatus.idle;
 
   @override
   void initState() {
@@ -75,6 +77,27 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     }
   }
 
+  Future<void> _submitRating(Booking booking, int stars, String? comment) async {
+    setState(() => _ratingAction = ActionStatus.submitting);
+    try {
+      final updated = await AppScope.of(context).bookingRepository.rateMarshal(
+            bookingId: booking.id,
+            stars: stars,
+            comment: comment,
+          );
+      if (!mounted) return;
+      setState(() {
+        _state = Content(updated);
+        _ratingAction = ActionStatus.idle;
+      });
+      showAppSnack(context, 'Спасибо за оценку');
+    } on Object catch (error) {
+      if (!mounted) return;
+      setState(() => _ratingAction = ActionStatus.idle);
+      showFailureSnack(context, toAppFailure(error));
+    }
+  }
+
   void _openMap(Booking booking) {
     final slot = booking.slot;
     showTrackMapSheet(
@@ -110,6 +133,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     final textTheme = Theme.of(context).textTheme;
     final slot = booking.slot;
     final canCancel = CancellationPolicy.canCancel(booking, DateTime.now());
+    final canRate = RatingPolicy.canRate(booking, DateTime.now());
     final centerCancelled = booking.status == BookingStatus.cancelledByCenter ||
         slot.status == SlotStatus.cancelled;
 
@@ -170,6 +194,12 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             title: 'Маршал',
             value: slot.marshal.name,
           ),
+          if (slot.marshal.ratingLabel != null)
+            _InfoRow(
+              icon: Icons.star_outline,
+              title: 'Рейтинг маршала',
+              value: slot.marshal.ratingLabel!,
+            ),
           _InfoRow(
             icon: Icons.event_seat_outlined,
             title: 'Места',
@@ -203,6 +233,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             label: const Text('Карта трассы'),
           ),
           const SizedBox(height: ApexSpacing.lg),
+          if (canRate || booking.marshalRating != null)
+            MarshalRatingSection(
+              marshalName: slot.marshal.name,
+              rating: booking.marshalRating,
+              submitting: _ratingAction == ActionStatus.submitting,
+              onSubmit: (stars, comment) => _submitRating(booking, stars, comment),
+            ),
+          if (canRate || booking.marshalRating != null)
+            const SizedBox(height: ApexSpacing.lg),
           if (canCancel)
             FilledButton(
               onPressed: () => _cancel(booking),

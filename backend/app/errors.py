@@ -18,6 +18,8 @@ ERROR_CODES = {
     "forbidden",
     "not_found",
     "validation_error",
+    "already_rated",
+    "rating_not_eligible",
     "server_error",
 }
 
@@ -35,6 +37,8 @@ DEFAULT_STATUS = {
     "forbidden": 403,
     "not_found": 404,
     "validation_error": 400,
+    "already_rated": 409,
+    "rating_not_eligible": 422,
     "server_error": 500,
 }
 

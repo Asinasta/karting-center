@@ -12,7 +12,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
-from ..contracts.bookings import Booking, BookingList, BookingSlotSnapshot, CreateBookingRequest
+from ..contracts.bookings import Booking, BookingList, BookingSlotSnapshot, CreateBookingRequest, CreateMarshalRatingRequest, MarshalRating
 from ..contracts.common import Money, Pagination
 from ..contracts.marshals import Marshal
 from ..contracts.profile import Profile
@@ -28,6 +28,7 @@ from ..domain.models import (
     TrackConfigRecord,
 )
 from ..domain.policies import (
+    can_rate_marshal,
     cancellation_kind,
     ensure_bookable,
     price_total,
@@ -133,6 +134,16 @@ class _PhoneChangeOtp:
     last_sent_at: datetime | None = None
 
 
+@dataclass
+class MarshalRatingRecord:
+    booking_id: UUID
+    client_id: UUID
+    marshal_id: UUID
+    stars: int
+    comment: str | None
+    created_at: datetime
+
+
 def _money(amount: int) -> Money:
     return Money(amount=amount, currency="RUB")
 
@@ -216,6 +227,7 @@ class FixturesAdapter(Backend):
         self._refresh_jtis: dict[UUID, set[str]] = {}
         self._push_tokens: dict[tuple[UUID, str, str | None], PushTokenRecord] = {}
         self._late_cancel_events: list[UUID] = []
+        self._marshal_ratings: dict[UUID, MarshalRatingRecord] = {}
 
         self._seed()
 
@@ -318,6 +330,13 @@ class FixturesAdapter(Backend):
             created_at=now - timedelta(days=3),
         )
 
+        self._seed_demo_marshal_ratings(
+            client_id=client.id,
+            now=now,
+            novice=novice,
+            marshals=marshals,
+        )
+
         # Booking cancelled by the center.
         cancelled_by_center_booking = self._new_booking(
             client_id=client.id,
@@ -356,6 +375,50 @@ class FixturesAdapter(Backend):
         self._bookings[record.id] = record
         return record.id
 
+    def _seed_demo_marshal_ratings(
+        self,
+        *,
+        client_id: UUID,
+        now: datetime,
+        novice: TrackConfigRecord,
+        marshals: list[MarshalRecord],
+    ) -> None:
+        demo = (
+            (marshals[0], 5, "Отличный инструктаж, всё понятно"),
+            (marshals[0], 5, None),
+            (marshals[1], 4, "Хорошо, но немного сумбурно на старте"),
+        )
+        for index, (marshal, stars, comment) in enumerate(demo):
+            slot = SlotRecord(
+                id=uuid4(),
+                track_config_id=novice.id,
+                marshal_id=marshal.id,
+                start_at=now - timedelta(days=10 + index),
+                total_seats=8,
+                free_seats=6,
+                free_rental_gear=4,
+                price=_money(150000),
+                rental_price=_money(50000),
+                meeting_point="Главный вход",
+                status="scheduled",
+            )
+            self._slots[slot.id] = slot
+            booking_id = self._new_booking(
+                client_id=client_id,
+                slot=slot,
+                seat_gear=["own"],
+                status="completed",
+                created_at=now - timedelta(days=11 + index),
+            )
+            self._marshal_ratings[booking_id] = MarshalRatingRecord(
+                booking_id=booking_id,
+                client_id=client_id,
+                marshal_id=marshal.id,
+                stars=stars,
+                comment=comment,
+                created_at=now - timedelta(days=10 + index, hours=1),
+            )
+
     # --------------------------------------------------------------- mappers
     def _track_contract(self, track_id: UUID) -> TrackConfig:
         t = self._track_configs[track_id]
@@ -369,9 +432,31 @@ class FixturesAdapter(Backend):
             geometry=t.geometry,
         )
 
-    def _marshal_contract(self, marshal_id: UUID) -> Marshal:
+    def _marshal_stats(self, marshal_id: UUID) -> tuple[float | None, int]:
+        ratings = [r for r in self._marshal_ratings.values() if r.marshal_id == marshal_id]
+        if not ratings:
+            return None, 0
+        average = sum(r.stars for r in ratings) / len(ratings)
+        return round(average, 1), len(ratings)
+
+    def _marshal_contract(self, marshal_id: UUID, *, include_stats: bool = True) -> Marshal:
         m = self._marshals[marshal_id]
-        return Marshal(id=m.id, name=m.name)
+        if not include_stats:
+            return Marshal(id=m.id, name=m.name)
+        average_rating, rating_count = self._marshal_stats(marshal_id)
+        return Marshal(
+            id=m.id,
+            name=m.name,
+            average_rating=average_rating,
+            rating_count=rating_count,
+        )
+
+    def _marshal_rating_contract(self, record: MarshalRatingRecord) -> MarshalRating:
+        return MarshalRating(
+            stars=record.stars,
+            comment=record.comment,
+            created_at=record.created_at,
+        )
 
     def _slot_contract(self, s: SlotRecord) -> Slot:
         return Slot(
@@ -396,7 +481,7 @@ class FixturesAdapter(Backend):
         return BookingSlotSnapshot(
             id=s.id,
             track_config=self._track_contract(s.track_config_id),
-            marshal=self._marshal_contract(s.marshal_id),
+            marshal=self._marshal_contract(s.marshal_id, include_stats=False),
             start_at=s.start_at,
             price=s.price,
             rental_price=s.rental_price,
@@ -409,6 +494,7 @@ class FixturesAdapter(Backend):
         )
 
     def _booking_contract(self, b: BookingRecord) -> Booking:
+        rating = self._marshal_ratings.get(b.id)
         return Booking(
             id=b.id,
             slot=b.slot_snapshot,
@@ -420,6 +506,7 @@ class FixturesAdapter(Backend):
             created_at=b.created_at,
             cancelled_at=b.cancelled_at,
             cancel_reason=b.cancel_reason,
+            marshal_rating=self._marshal_rating_contract(rating) if rating else None,
         )
 
     def _profile_contract(self, c: ClientRecord) -> Profile:
@@ -544,7 +631,7 @@ class FixturesAdapter(Backend):
     # ---------------------------------------------------------- MarshalPort
     def list_marshals(self) -> list[Marshal]:
         with self._lock:
-            return [Marshal(id=m.id, name=m.name) for m in self._marshals.values()]
+            return [self._marshal_contract(m.id) for m in self._marshals.values()]
 
     # ---------------------------------------------------------- BookingPort
     def create_booking(
@@ -646,6 +733,37 @@ class FixturesAdapter(Backend):
             else:
                 record.status = "late_cancel"
                 self._late_cancel_events.append(record.id)
+            return self._booking_contract(record)
+
+    def rate_marshal(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking:
+        with self._lock:
+            record = self._owned_booking(client_id, booking_id)
+            if booking_id in self._marshal_ratings:
+                raise ApiError("already_rated", "Marshal was already rated for this booking")
+            if not can_rate_marshal(
+                status=record.status,
+                start_at=record.slot_snapshot.start_at,
+                now=now,
+            ):
+                raise ApiError(
+                    "rating_not_eligible",
+                    "Booking is not eligible for marshal rating",
+                )
+
+            self._marshal_ratings[booking_id] = MarshalRatingRecord(
+                booking_id=booking_id,
+                client_id=client_id,
+                marshal_id=record.slot_snapshot.marshal.id,
+                stars=req.stars,
+                comment=req.comment,
+                created_at=now,
+            )
             return self._booking_contract(record)
 
     # ---------------------------------------------------------- ProfilePort

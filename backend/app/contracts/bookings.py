@@ -15,6 +15,18 @@ from .slots import TrackConfig
 GearChoice = Literal["own", "rental"]
 BookingStatus = Literal["active", "cancelled", "late_cancel", "cancelled_by_center", "completed"]
 MAX_BOOKING_SEATS = 14
+MAX_MARSHAL_RATING_COMMENT = 500
+
+
+class MarshalRating(BaseModel):
+    stars: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=MAX_MARSHAL_RATING_COMMENT)
+    created_at: datetime
+
+
+class CreateMarshalRatingRequest(BaseModel):
+    stars: int = Field(ge=1, le=5)
+    comment: str | None = Field(default=None, max_length=MAX_MARSHAL_RATING_COMMENT)
 
 
 class BookingSlotSnapshot(BaseModel):
@@ -43,6 +55,7 @@ class Booking(BaseModel):
     created_at: datetime
     cancelled_at: datetime | None = None
     cancel_reason: str | None = None
+    marshal_rating: MarshalRating | None = None
 
 
 class CreateBookingRequest(BaseModel):

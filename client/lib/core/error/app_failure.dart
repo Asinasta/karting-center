@@ -12,6 +12,8 @@ abstract final class ApiErrorCode {
   static const forbidden = 'forbidden';
   static const notFound = 'not_found';
   static const validationError = 'validation_error';
+  static const alreadyRated = 'already_rated';
+  static const ratingNotEligible = 'rating_not_eligible';
   static const serverError = 'server_error';
 }
 

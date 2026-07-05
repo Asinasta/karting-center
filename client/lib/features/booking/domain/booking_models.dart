@@ -108,6 +108,26 @@ class BookingSlotSnapshot {
   final String? cancelReason;
 }
 
+class MarshalRating {
+  const MarshalRating({
+    required this.stars,
+    required this.createdAt,
+    this.comment,
+  });
+
+  factory MarshalRating.fromJson(Map<String, Object?> json) {
+    return MarshalRating(
+      stars: json['stars'] as int,
+      comment: json['comment'] as String?,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+
+  final int stars;
+  final String? comment;
+  final DateTime createdAt;
+}
+
 /// `Booking` from `01-analysis/api/bookings/models.yaml`.
 class Booking {
   const Booking({
@@ -121,6 +141,7 @@ class Booking {
     required this.createdAt,
     this.cancelledAt,
     this.cancelReason,
+    this.marshalRating,
   });
 
   factory Booking.fromJson(Map<String, Object?> json) {
@@ -139,6 +160,9 @@ class Booking {
           ? DateTime.parse(json['cancelled_at'] as String)
           : null,
       cancelReason: json['cancel_reason'] as String?,
+      marshalRating: json['marshal_rating'] != null
+          ? MarshalRating.fromJson(json['marshal_rating'] as Map<String, Object?>)
+          : null,
     );
   }
 
@@ -152,6 +176,7 @@ class Booking {
   final DateTime createdAt;
   final DateTime? cancelledAt;
   final String? cancelReason;
+  final MarshalRating? marshalRating;
 }
 
 class BookingList {

@@ -6,10 +6,19 @@ components:
   schemas:
     Marshal:
       type: object
-      required: [id, name]
+      required: [id, name, rating_count]
       properties:
         id:
           type: string
           format: uuid
         name:
           type: string
+        average_rating:
+          type: number
+          minimum: 1
+          maximum: 5
+          description: Mean star rating; omitted when there are no ratings yet.
+        rating_count:
+          type: integer
+          minimum: 0
+          default: 0

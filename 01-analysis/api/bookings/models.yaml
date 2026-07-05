@@ -7,6 +7,31 @@ components:
     GearChoice:
       type: string
       enum: [own, rental]
+    MarshalRating:
+      type: object
+      required: [stars, created_at]
+      properties:
+        stars:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+    CreateMarshalRatingRequest:
+      type: object
+      required: [stars]
+      properties:
+        stars:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+          maxLength: 500
     Booking:
       type: object
       required: [id, slot, seats_count, rental_count, seat_gear, price_total, status, created_at]
@@ -46,6 +71,8 @@ components:
           format: date-time
         cancel_reason:
           type: string
+        marshal_rating:
+          $ref: '#/components/schemas/MarshalRating'
     BookingSlotSnapshot:
       type: object
       required: [id, track_config, marshal, start_at, price, rental_price, meeting_point, status]

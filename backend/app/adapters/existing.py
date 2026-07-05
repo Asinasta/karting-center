@@ -16,7 +16,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from ..contracts.bookings import Booking, BookingList, CreateBookingRequest
+from ..contracts.bookings import Booking, BookingList, CreateBookingRequest, CreateMarshalRatingRequest
 from ..contracts.marshals import Marshal
 from ..contracts.profile import Profile
 from ..contracts.slots import Slot
@@ -73,6 +73,15 @@ class ExistingBackendAdapter(_NotImplementedBackend):
 
     def cancel_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking:
         self._todo("cancel_booking")
+
+    def rate_marshal(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking:
+        self._todo("rate_marshal")
 
     def get_profile(self, client_id: UUID) -> Profile:
         self._todo("get_profile")
