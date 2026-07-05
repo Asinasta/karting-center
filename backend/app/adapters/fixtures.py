@@ -44,9 +44,77 @@ DEV_OTP_CODE = "0000"
 MSK = timezone(timedelta(hours=3))  # Moscow is UTC+3 year-round (no DST).
 CATALOG_YEAR = 2026
 CATALOG_MONTH = 7
-CATALOG_DAY_FROM = 10
-CATALOG_DAY_TO = 20
-CATALOG_SLOT_MINUTES = (0, 15, 30, 45)
+CATALOG_DAY_FROM = 5
+CATALOG_DAY_TO = 15
+CATALOG_DAILY_TIMES = ((12, 15), (13, 15), (14, 15))
+
+# Overrides keyed by (day, hour, minute) in MSK.
+_CATALOG_SPECIALS: dict[tuple[int, int, int], dict[str, object]] = {
+    (5, 14, 15): {
+        "status": "cancelled",
+        "cancel_reason": "Нехватка инструкторов",
+    },
+    (6, 12, 15): {
+        "experienced": False,
+        "marshal_index": 0,
+        "free_seats": 6,
+        "free_rental_gear": 4,
+        "meeting_point": "Главный вход, стойка регистрации",
+        "meeting_lat": 55.751,
+        "meeting_lng": 37.618,
+    },
+    (7, 13, 15): {
+        "status": "cancelled",
+        "cancel_reason": "Техническое обслуживание трассы",
+        "marshal_index": 1,
+    },
+    (8, 14, 15): {
+        "experienced": True,
+        "marshal_index": 1,
+        "free_seats": 0,
+        "free_rental_gear": 0,
+    },
+    (9, 12, 15): {
+        "experienced": True,
+        "marshal_index": 3,
+        "free_seats": 10,
+        "free_rental_gear": 0,
+    },
+    (10, 12, 15): {"experienced": True, "free_seats": 0, "free_rental_gear": 0},
+    (10, 13, 15): {
+        "experienced": True,
+        "marshal_index": 2,
+        "free_seats": 11,
+        "free_rental_gear": 0,
+    },
+    (11, 12, 15): {
+        "status": "cancelled",
+        "cancel_reason": "Неблагоприятные погодные условия",
+    },
+    (11, 13, 15): {"free_seats": 2, "free_rental_gear": 1},
+    (12, 13, 15): {
+        "experienced": True,
+        "marshal_index": 4,
+        "free_seats": 0,
+        "free_rental_gear": 0,
+    },
+    (13, 14, 15): {
+        "experienced": True,
+        "marshal_index": 3,
+        "free_seats": 9,
+        "free_rental_gear": 0,
+    },
+    (14, 12, 15): {
+        "status": "cancelled",
+        "cancel_reason": "Плановое обслуживание оборудования",
+    },
+    (14, 14, 15): {"free_seats": 1, "free_rental_gear": 0},
+    (15, 13, 15): {"experienced": True, "free_seats": 0, "free_rental_gear": 0},
+    (15, 14, 15): {"free_seats": 2, "free_rental_gear": 3},
+}
+
+SLOT_AVAILABLE_KEY = (6, 12, 15)
+SLOT_CANCELLED_KEY = (7, 13, 15)
 
 
 @dataclass
@@ -77,6 +145,57 @@ def _catalog_range() -> tuple[datetime, datetime]:
     start = _catalog_moment(CATALOG_DAY_FROM, 0, 0)
     end = _catalog_moment(CATALOG_DAY_TO, 23, 59)
     return start, end
+
+
+def _build_catalog_slot(
+    *,
+    novice: TrackConfigRecord,
+    experienced: TrackConfigRecord,
+    marshals: list[MarshalRecord],
+    day: int,
+    hour: int,
+    minute: int,
+) -> SlotRecord:
+    time_idx = CATALOG_DAILY_TIMES.index((hour, minute))
+    slot_idx = (day - CATALOG_DAY_FROM) * len(CATALOG_DAILY_TIMES) + time_idx
+    spec = _CATALOG_SPECIALS.get((day, hour, minute), {})
+
+    use_experienced = bool(spec.get("experienced", slot_idx % 2 == 1))
+    track = experienced if use_experienced else novice
+    marshal = marshals[int(spec.get("marshal_index", slot_idx % len(marshals)))]
+
+    total_seats = 14 if use_experienced else 8
+    free_seats = int(spec.get("free_seats", total_seats - (slot_idx % 4)))
+    free_rental_gear = int(
+        spec.get("free_rental_gear", max(2, (total_seats // 2) - (slot_idx % 3)))
+    )
+    status = str(spec.get("status", "scheduled"))
+    cancel_reason = spec.get("cancel_reason")
+    meeting_point = str(
+        spec.get(
+            "meeting_point",
+            "Главный вход, стойка регистрации" if not use_experienced else "Бокс №2",
+        )
+    )
+    meeting_lat = spec.get("meeting_lat", 55.751 if not use_experienced else None)
+    meeting_lng = spec.get("meeting_lng", 37.618 if not use_experienced else None)
+
+    return SlotRecord(
+        id=uuid4(),
+        track_config_id=track.id,
+        marshal_id=marshal.id,
+        start_at=_catalog_moment(day, hour, minute),
+        total_seats=total_seats,
+        free_seats=free_seats,
+        free_rental_gear=free_rental_gear,
+        price=_money(250000 if use_experienced else 150000),
+        rental_price=_money(70000 if use_experienced else 50000),
+        meeting_point=meeting_point,
+        meeting_point_lat=meeting_lat,  # type: ignore[arg-type]
+        meeting_point_lng=meeting_lng,  # type: ignore[arg-type]
+        status=status,
+        cancel_reason=cancel_reason,  # type: ignore[arg-type]
+    )
 
 
 class FixturesAdapter(Backend):
@@ -135,109 +254,28 @@ class FixturesAdapter(Backend):
 
         marshals = [marshal_a, marshal_b, marshal_c, marshal_d, marshal_e]
 
-        # --- Catalog: 10–20 July 2026, 12:00–16:00 every 15 minutes (MSK). ---
+        # --- Catalog: 5–15 July 2026, three slots/day at 12:15, 13:15, 14:15 (MSK). ---
         slot_available: SlotRecord | None = None
         slot_cancelled: SlotRecord | None = None
         catalog_slots: list[SlotRecord] = []
 
         for day in range(CATALOG_DAY_FROM, CATALOG_DAY_TO + 1):
-            for hour in range(12, 17):
-                for minute in CATALOG_SLOT_MINUTES:
-                    if hour == 16 and minute > 0:
-                        continue
+            for hour, minute in CATALOG_DAILY_TIMES:
+                slot = _build_catalog_slot(
+                    novice=novice,
+                    experienced=experienced,
+                    marshals=marshals,
+                    day=day,
+                    hour=hour,
+                    minute=minute,
+                )
+                catalog_slots.append(slot)
 
-                    start_at = _catalog_moment(day, hour, minute)
-                    key = (day, hour, minute)
-
-                    if key == (10, 13, 15):
-                        track = novice
-                        marshal = marshal_a
-                        total_seats = 8
-                        free_seats = 6
-                        free_rental_gear = 4
-                        price = _money(150000)
-                        rental_price = _money(50000)
-                        meeting_point = "Главный вход, стойка регистрации"
-                        meeting_lat, meeting_lng = 55.751, 37.618
-                        status = "scheduled"
-                        cancel_reason = None
-                    elif key == (11, 14, 15):
-                        track = novice
-                        marshal = marshal_b
-                        total_seats = 8
-                        free_seats = 8
-                        free_rental_gear = 4
-                        price = _money(150000)
-                        rental_price = _money(50000)
-                        meeting_point = "Главный вход"
-                        meeting_lat, meeting_lng = None, None
-                        status = "cancelled"
-                        cancel_reason = "Техническое обслуживание трассы"
-                    elif key == (12, 15, 30):
-                        track = experienced
-                        marshal = marshal_b
-                        total_seats = 14
-                        free_seats = 0
-                        free_rental_gear = 0
-                        price = _money(250000)
-                        rental_price = _money(70000)
-                        meeting_point = "Бокс №2"
-                        meeting_lat, meeting_lng = None, None
-                        status = "scheduled"
-                        cancel_reason = None
-                    elif key == (13, 15, 45):
-                        track = experienced
-                        marshal = marshal_d
-                        total_seats = 14
-                        free_seats = 10
-                        free_rental_gear = 0
-                        price = _money(250000)
-                        rental_price = _money(70000)
-                        meeting_point = "Бокс №1"
-                        meeting_lat, meeting_lng = None, None
-                        status = "scheduled"
-                        cancel_reason = None
-                    else:
-                        idx = day * 100 + hour * 4 + minute // 15
-                        track = novice if idx % 2 == 0 else experienced
-                        marshal = marshals[idx % len(marshals)]
-                        total_seats = 8 if track.type == "novice" else 14
-                        free_seats = total_seats - (idx % 4)
-                        free_rental_gear = max(0, (total_seats // 2) - (idx % 3))
-                        price = _money(150000 if track.type == "novice" else 250000)
-                        rental_price = _money(50000 if track.type == "novice" else 70000)
-                        meeting_point = (
-                            "Главный вход, стойка регистрации"
-                            if track.type == "novice"
-                            else "Бокс №2"
-                        )
-                        meeting_lat = 55.751 if track.type == "novice" else None
-                        meeting_lng = 37.618 if track.type == "novice" else None
-                        status = "scheduled"
-                        cancel_reason = None
-
-                    slot = SlotRecord(
-                        id=uuid4(),
-                        track_config_id=track.id,
-                        marshal_id=marshal.id,
-                        start_at=start_at,
-                        total_seats=total_seats,
-                        free_seats=free_seats,
-                        free_rental_gear=free_rental_gear,
-                        price=price,
-                        rental_price=rental_price,
-                        meeting_point=meeting_point,
-                        meeting_point_lat=meeting_lat,
-                        meeting_point_lng=meeting_lng,
-                        status=status,
-                        cancel_reason=cancel_reason,
-                    )
-                    catalog_slots.append(slot)
-
-                    if key == (10, 13, 15):
-                        slot_available = slot
-                    if key == (11, 14, 15):
-                        slot_cancelled = slot
+                key = (day, hour, minute)
+                if key == SLOT_AVAILABLE_KEY:
+                    slot_available = slot
+                if key == SLOT_CANCELLED_KEY:
+                    slot_cancelled = slot
 
         assert slot_available is not None and slot_cancelled is not None
         for s in catalog_slots:
