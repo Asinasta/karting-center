@@ -1,5 +1,3 @@
-import 'dart:io' show Platform;
-
 import 'package:flutter/foundation.dart';
 
 class ApiConfig {
@@ -19,12 +17,8 @@ class ApiConfig {
     if (kIsWeb) {
       return 'http://localhost:8080';
     }
-    try {
-      if (Platform.isAndroid) {
-        return 'http://10.0.2.2:8080';
-      }
-    } on Object {
-      // Platform is unavailable on web (already handled above).
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8080';
     }
     return 'http://localhost:8080';
   }

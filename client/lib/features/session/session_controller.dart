@@ -30,14 +30,19 @@ class SessionController extends ChangeNotifier {
   Future<void> checkSession() async {
     _setState(const CheckingSession());
 
-    final hasRefresh = await _sessionRepository.restore();
-    if (!hasRefresh) {
-      _setState(const GuestSession());
-      return;
-    }
+    try {
+      final hasRefresh = await _sessionRepository.restore();
+      if (!hasRefresh) {
+        _setState(const GuestSession());
+        return;
+      }
 
-    _setState(const AuthenticatedSession());
-    await _loadProfileSilently();
+      _setState(const AuthenticatedSession());
+      await _loadProfileSilently();
+    } on Object {
+      // Secure storage or token read failed — continue as guest.
+      _setState(const GuestSession());
+    }
   }
 
   /// Called by AuthFlow after a successful verifyOtp.

@@ -125,7 +125,7 @@ class _TextFallback extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: ApexColors.outline.withValues(alpha: 0.3),
+        color: ApexColors.outline.withOpacity(0.3),
         borderRadius: BorderRadius.circular(ApexRadius.md),
       ),
       padding: const EdgeInsets.all(ApexSpacing.lg),
@@ -160,7 +160,7 @@ class _TrackSchema extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: ApexColors.outline.withValues(alpha: 0.3),
+        color: ApexColors.outline.withOpacity(0.3),
         borderRadius: BorderRadius.circular(ApexRadius.md),
       ),
       clipBehavior: Clip.antiAlias,

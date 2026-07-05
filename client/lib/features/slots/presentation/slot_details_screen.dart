@@ -175,7 +175,7 @@ class _CancelReasonBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ApexSpacing.md),
       decoration: BoxDecoration(
-        color: ApexColors.trackRed.withValues(alpha: 0.08),
+        color: ApexColors.trackRed.withOpacity(0.08),
         borderRadius: BorderRadius.circular(ApexRadius.sm),
       ),
       child: Row(
@@ -235,7 +235,7 @@ class _MapPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ApexColors.outline.withValues(alpha: 0.3),
+      color: ApexColors.outline.withOpacity(0.3),
       borderRadius: BorderRadius.circular(ApexRadius.md),
       child: InkWell(
         onTap: onTap,

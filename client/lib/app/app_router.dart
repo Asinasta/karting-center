@@ -27,6 +27,18 @@ GoRouter createAppRouter(AppDependencies dependencies) {
     initialLocation: '/',
     // Re-evaluates redirects when the session changes (auth gate, logout).
     refreshListenable: session,
+    errorBuilder: (context, state) => Scaffold(
+      appBar: AppBar(title: const Text('Ошибка')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            state.error?.toString() ?? 'Не удалось открыть экран',
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    ),
     redirect: (context, state) {
       final sessionState = session.state;
       final location = state.matchedLocation;

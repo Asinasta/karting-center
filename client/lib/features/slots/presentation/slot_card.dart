@@ -117,7 +117,7 @@ class SlotStatusLabel extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
+        color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(ApexRadius.sm),
       ),
       child: Padding(
