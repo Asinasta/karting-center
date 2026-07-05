@@ -9,9 +9,8 @@ from __future__ import annotations
 import random
 import threading
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
-from zoneinfo import ZoneInfo
 
 from ..contracts.bookings import Booking, BookingList, BookingSlotSnapshot, CreateBookingRequest
 from ..contracts.common import Money, Pagination
@@ -42,7 +41,7 @@ OTP_RESEND_INTERVAL = timedelta(seconds=60)
 OTP_MAX_ATTEMPTS = 5
 DEV_OTP_CODE = "0000"
 
-MSK = ZoneInfo("Europe/Moscow")
+MSK = timezone(timedelta(hours=3))  # Moscow is UTC+3 year-round (no DST).
 CATALOG_YEAR = 2026
 CATALOG_MONTH = 7
 CATALOG_DAY_FROM = 10
