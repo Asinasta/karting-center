@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../app/app_scope.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/theme/apex_tokens.dart';
+import '../../../core/ui/apex_dialog.dart';
 import '../../../core/ui/load_state.dart';
 import '../domain/profile_models.dart';
 
@@ -13,16 +14,9 @@ import '../domain/profile_models.dart';
 /// Sends the code to the new number; the old number stays active until the
 /// change is verified. Returns the updated [Profile] on success.
 Future<Profile?> showPhoneChangeSheet(BuildContext context, Profile profile) {
-  return showModalBottomSheet<Profile>(
+  return showApexDialog<Profile>(
     context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: _PhoneChangeSheet(currentPhone: profile.phone),
-    ),
+    builder: (context) => _PhoneChangeSheet(currentPhone: profile.phone),
   );
 }
 
@@ -143,97 +137,90 @@ class _PhoneChangeSheetState extends State<_PhoneChangeSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
     final submitting = _status == ActionStatus.submitting;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          ApexSpacing.lg,
-          0,
-          ApexSpacing.lg,
-          ApexSpacing.lg,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'Смена телефона',
-              style:
-                  textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+    return ApexDialogScaffold(
+      title: 'Смена телефона',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            _step == _Step.phone
+                ? 'Номер останется активным до подтверждения нового'
+                : 'Код отправлен на $_newPhone',
+          ),
+          const SizedBox(height: ApexSpacing.md),
+          if (_step == _Step.phone)
+            TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              autofocus: true,
+              enabled: !submitting,
+              decoration: const InputDecoration(
+                labelText: 'Новый телефон',
+                hintText: '+79991234567',
+              ),
+              onSubmitted: (_) => _sendOtp(),
+            )
+          else
+            TextField(
+              controller: _codeController,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              enabled: !submitting,
+              maxLength: 8,
+              decoration: const InputDecoration(
+                labelText: 'Код из SMS',
+                counterText: '',
+              ),
+              onSubmitted: (_) => _verify(),
             ),
+          if (_inlineError != null) ...[
             const SizedBox(height: ApexSpacing.sm),
             Text(
-              _step == _Step.phone
-                  ? 'Текущий номер ${widget.currentPhone} останется активным '
-                      'до подтверждения нового.'
-                  : 'Код отправлен на $_newPhone',
+              _inlineError!,
+              style: const TextStyle(color: ApexColors.trackRed),
             ),
-            const SizedBox(height: ApexSpacing.md),
-            if (_step == _Step.phone)
-              TextField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                autofocus: true,
-                enabled: !submitting,
-                decoration: const InputDecoration(
-                  labelText: 'Новый телефон',
-                  hintText: '+79991234567',
-                ),
-                onSubmitted: (_) => _sendOtp(),
-              )
-            else
-              TextField(
-                controller: _codeController,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                enabled: !submitting,
-                maxLength: 8,
-                decoration: const InputDecoration(
-                  labelText: 'Код из SMS',
-                  counterText: '',
-                ),
-                onSubmitted: (_) => _verify(),
-              ),
-            if (_inlineError != null) ...[
-              const SizedBox(height: ApexSpacing.sm),
-              Text(
-                _inlineError!,
-                style: const TextStyle(color: ApexColors.trackRed),
-              ),
-            ],
-            const SizedBox(height: ApexSpacing.md),
-            if (_step == _Step.phone)
-              FilledButton(
+          ],
+        ],
+      ),
+      actions: _step == _Step.phone
+          ? [
+              ApexDialogAction(
+                label: submitting
+                    ? 'Отправляем…'
+                    : _resendSecondsLeft > 0
+                        ? 'Повтор через $_resendSecondsLeft с'
+                        : 'Получить код',
                 onPressed:
                     submitting || _resendSecondsLeft > 0 ? null : _sendOtp,
-                child: Text(
-                  submitting
-                      ? 'Отправляем…'
-                      : _resendSecondsLeft > 0
-                          ? 'Повтор через $_resendSecondsLeft с'
-                          : 'Получить код',
-                ),
-              )
-            else ...[
-              FilledButton(
-                onPressed: submitting ? null : _verify,
-                child: Text(submitting ? 'Проверяем…' : 'Подтвердить'),
               ),
-              TextButton(
-                onPressed: submitting || _resendSecondsLeft > 0 ? null : _sendOtp,
-                child: Text(
-                  _resendSecondsLeft > 0
-                      ? 'Отправить код ещё раз через $_resendSecondsLeft с'
-                      : 'Отправить код ещё раз',
-                ),
+              ApexDialogAction(
+                label: 'Отмена',
+                kind: ApexDialogActionKind.secondary,
+                onPressed: submitting ? null : () => Navigator.of(context).pop(),
+              ),
+            ]
+          : [
+              ApexDialogAction(
+                label: submitting ? 'Проверяем…' : 'Подтвердить',
+                onPressed: submitting ? null : _verify,
+              ),
+              ApexDialogAction(
+                label: _resendSecondsLeft > 0
+                    ? 'Отправить код ещё раз через $_resendSecondsLeft с'
+                    : 'Отправить код ещё раз',
+                kind: ApexDialogActionKind.secondary,
+                onPressed:
+                    submitting || _resendSecondsLeft > 0 ? null : _sendOtp,
+              ),
+              ApexDialogAction(
+                label: 'Отмена',
+                kind: ApexDialogActionKind.secondary,
+                onPressed: submitting ? null : () => Navigator.of(context).pop(),
               ),
             ],
-          ],
-        ),
-      ),
     );
   }
 }

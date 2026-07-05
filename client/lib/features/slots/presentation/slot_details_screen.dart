@@ -58,8 +58,6 @@ class _SlotDetailsScreenState extends State<SlotDetailsScreen> {
   }
 
   void _book(Slot slot) {
-    // Auth gate lives in the router: guests are redirected to /auth
-    // and return here after OTP (return intent).
     context.go('/slots/${slot.id}/book');
   }
 
@@ -74,7 +72,6 @@ class _SlotDetailsScreenState extends State<SlotDetailsScreen> {
             onRetry: _load,
           ),
         Content<Slot>(data: final slot) => _content(slot),
-        // Not applicable for a single entity.
         Empty<Slot>() || OfflineStale<Slot>() => const LoadingStateView(),
       },
     );

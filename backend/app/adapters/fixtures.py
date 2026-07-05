@@ -89,7 +89,10 @@ class FixturesAdapter(Backend):
 
         marshal_a = MarshalRecord(id=uuid4(), name="Иван Гонщиков")
         marshal_b = MarshalRecord(id=uuid4(), name="Пётр Скоростной")
-        for m in (marshal_a, marshal_b):
+        marshal_c = MarshalRecord(id=uuid4(), name="Алексей Трекмастер")
+        marshal_d = MarshalRecord(id=uuid4(), name="Мария Быстрая")
+        marshal_e = MarshalRecord(id=uuid4(), name="Сергей Дрифт")
+        for m in (marshal_a, marshal_b, marshal_c, marshal_d, marshal_e):
             self._marshals[m.id] = m
 
         novice = TrackConfigRecord(
@@ -113,12 +116,31 @@ class FixturesAdapter(Backend):
         for t in (novice, experienced):
             self._track_configs[t.id] = t
 
-        # Available slot.
+        # --- Catalog slots spread across dates and marshals (5 instructors). ---
+        today_base = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        wd = now.weekday()  # Mon=0 … Sun=6
+
+        slot_today = SlotRecord(
+            id=uuid4(),
+            track_config_id=novice.id,
+            marshal_id=marshal_c.id,
+            start_at=now + timedelta(hours=2),
+            total_seats=8,
+            free_seats=5,
+            free_rental_gear=3,
+            price=_money(150000),
+            rental_price=_money(50000),
+            meeting_point="Главный вход, стойка регистрации",
+            meeting_point_lat=55.751,
+            meeting_point_lng=37.618,
+            status="scheduled",
+        )
+        # Available slot (tomorrow) — used by the seed booking below.
         slot_available = SlotRecord(
             id=uuid4(),
             track_config_id=novice.id,
             marshal_id=marshal_a.id,
-            start_at=now + timedelta(days=1),
+            start_at=now + timedelta(days=1, hours=10),
             total_seats=8,
             free_seats=6,
             free_rental_gear=4,
@@ -134,7 +156,7 @@ class FixturesAdapter(Backend):
             id=uuid4(),
             track_config_id=experienced.id,
             marshal_id=marshal_b.id,
-            start_at=now + timedelta(days=1, hours=3),
+            start_at=now + timedelta(days=1, hours=15),
             total_seats=14,
             free_seats=0,
             free_rental_gear=0,
@@ -143,12 +165,79 @@ class FixturesAdapter(Backend):
             meeting_point="Бокс №2",
             status="scheduled",
         )
+        slot_tomorrow_evening = SlotRecord(
+            id=uuid4(),
+            track_config_id=novice.id,
+            marshal_id=marshal_d.id,
+            start_at=now + timedelta(days=1, hours=18),
+            total_seats=8,
+            free_seats=4,
+            free_rental_gear=2,
+            price=_money(150000),
+            rental_price=_money(50000),
+            meeting_point="Главный вход",
+            status="scheduled",
+        )
+        if wd == 6:
+            weekend_sat_start = None
+            weekend_sun_start = today_base.replace(hour=12)
+            if weekend_sun_start <= now:
+                weekend_sun_start = now + timedelta(hours=3)
+        elif wd == 5:
+            weekend_sat_start = max(now + timedelta(hours=2), today_base.replace(hour=14))
+            weekend_sun_start = today_base + timedelta(days=1, hours=12)
+        else:
+            sat_days = 5 - wd
+            weekend_sat_start = today_base + timedelta(days=sat_days, hours=14)
+            weekend_sun_start = today_base + timedelta(days=sat_days + 1, hours=12)
+
+        slot_weekend_sat = None
+        if weekend_sat_start is not None:
+            slot_weekend_sat = SlotRecord(
+                id=uuid4(),
+                track_config_id=experienced.id,
+                marshal_id=marshal_e.id,
+                start_at=weekend_sat_start,
+                total_seats=14,
+                free_seats=9,
+                free_rental_gear=5,
+                price=_money(250000),
+                rental_price=_money(70000),
+                meeting_point="Бокс №2",
+                status="scheduled",
+            )
+        slot_weekend_sun = SlotRecord(
+            id=uuid4(),
+            track_config_id=novice.id,
+            marshal_id=marshal_a.id,
+            start_at=weekend_sun_start,
+            total_seats=8,
+            free_seats=7,
+            free_rental_gear=4,
+            price=_money(150000),
+            rental_price=_money(50000),
+            meeting_point="Главный вход",
+            status="scheduled",
+        )
+        slot_midweek = SlotRecord(
+            id=uuid4(),
+            track_config_id=experienced.id,
+            marshal_id=marshal_c.id,
+            start_at=now + timedelta(days=4, hours=11),
+            total_seats=14,
+            free_seats=11,
+            free_rental_gear=6,
+            price=_money(250000),
+            rental_price=_money(70000),
+            meeting_point="Бокс №1",
+            status="scheduled",
+        )
         # Slot cancelled by the center.
         slot_cancelled = SlotRecord(
             id=uuid4(),
             track_config_id=novice.id,
-            marshal_id=marshal_a.id,
-            start_at=now + timedelta(days=2),
+            marshal_id=marshal_b.id,
+            start_at=now + timedelta(days=2, hours=10),
             total_seats=8,
             free_seats=8,
             free_rental_gear=4,
@@ -162,8 +251,8 @@ class FixturesAdapter(Backend):
         slot_no_gear = SlotRecord(
             id=uuid4(),
             track_config_id=experienced.id,
-            marshal_id=marshal_b.id,
-            start_at=now + timedelta(days=3),
+            marshal_id=marshal_d.id,
+            start_at=now + timedelta(days=3, hours=16),
             total_seats=14,
             free_seats=10,
             free_rental_gear=0,
@@ -172,7 +261,48 @@ class FixturesAdapter(Backend):
             meeting_point="Бокс №1",
             status="scheduled",
         )
-        for s in (slot_available, slot_full, slot_cancelled, slot_no_gear):
+        slot_month_mid = SlotRecord(
+            id=uuid4(),
+            track_config_id=novice.id,
+            marshal_id=marshal_e.id,
+            start_at=now + timedelta(days=18, hours=13),
+            total_seats=8,
+            free_seats=6,
+            free_rental_gear=3,
+            price=_money(150000),
+            rental_price=_money(50000),
+            meeting_point="Главный вход",
+            status="scheduled",
+        )
+        slot_month_late = SlotRecord(
+            id=uuid4(),
+            track_config_id=experienced.id,
+            marshal_id=marshal_b.id,
+            start_at=now + timedelta(days=28, hours=17),
+            total_seats=14,
+            free_seats=12,
+            free_rental_gear=7,
+            price=_money(250000),
+            rental_price=_money(70000),
+            meeting_point="Бокс №2",
+            status="scheduled",
+        )
+
+        catalog_slots = [
+            slot_today,
+            slot_available,
+            slot_full,
+            slot_tomorrow_evening,
+            slot_weekend_sun,
+            slot_midweek,
+            slot_cancelled,
+            slot_no_gear,
+            slot_month_mid,
+            slot_month_late,
+        ]
+        if slot_weekend_sat is not None:
+            catalog_slots.insert(4, slot_weekend_sat)
+        for s in catalog_slots:
             self._slots[s.id] = s
 
         # Seed client that owns the sample bookings.
@@ -366,10 +496,9 @@ class FixturesAdapter(Backend):
                     record.attempts += 1
                 raise ApiError("invalid_code", "Invalid OTP code")
 
-            self._otps.pop(phone, None)
-
             client_id = self._phone_index.get(phone)
             if client_id is not None:
+                self._otps.pop(phone, None)
                 return self._clients[client_id]
 
             if not name:
@@ -379,6 +508,7 @@ class FixturesAdapter(Backend):
             client = ClientRecord(id=uuid4(), name=name, phone=phone)
             self._clients[client.id] = client
             self._phone_index[phone] = client.id
+            self._otps.pop(phone, None)
             return client
 
     def get_client(self, client_id: UUID) -> ClientRecord | None:

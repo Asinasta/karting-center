@@ -4,7 +4,7 @@ import 'slot_models.dart';
 ///
 /// Groups: date period, track type, marshal, only available.
 /// OR inside a multi-value group, AND between groups — enforced server-side;
-/// the client only builds the query. Default period: next 7 days.
+/// the client only builds the query. Default period: next 7 days (server-side).
 class SlotFilter {
   const SlotFilter({
     this.dateFrom,

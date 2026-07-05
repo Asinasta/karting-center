@@ -133,16 +133,13 @@ class _SlotListScreenState extends State<SlotListScreen> {
       onRefresh: () => _load(refreshing: true),
       child: ListView.separated(
         padding: const EdgeInsets.all(ApexSpacing.md),
-        itemCount: slots.length + 1,
+        itemCount: slots.length + (refreshing ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: ApexSpacing.md),
         itemBuilder: (context, index) {
-          if (index == 0) {
-            return _Header(
-              filter: _filter,
-              refreshing: refreshing,
-            );
+          if (refreshing && index == 0) {
+            return const LinearProgressIndicator();
           }
-          final slot = slots[index - 1];
+          final slot = slots[refreshing ? index - 1 : index];
           return SlotCard(
             slot: slot,
             onTap: () => _openSlot(slot),
@@ -150,42 +147,6 @@ class _SlotListScreenState extends State<SlotListScreen> {
           );
         },
       ),
-    );
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.filter,
-    required this.refreshing,
-  });
-
-  final SlotFilter filter;
-  final bool refreshing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Выберите удобный заезд',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-        ),
-        const SizedBox(height: ApexSpacing.sm),
-        Text(
-          filter.isDefault
-              ? 'По умолчанию показаны ближайшие 7 дней.'
-              : 'Применены фильтры.',
-        ),
-        if (refreshing) ...[
-          const SizedBox(height: ApexSpacing.sm),
-          const LinearProgressIndicator(),
-        ],
-      ],
     );
   }
 }

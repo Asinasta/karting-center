@@ -11,8 +11,8 @@ import '../../../core/ui/snackbars.dart';
 
 /// SCR-001 — Регистрация / вход (OTP, LOGIC-001).
 ///
-/// Steps: phone -> code (+ name for a new client). On success the router
-/// redirect returns the user to [returnTo] (auth gate return intent).
+/// Steps: phone -> code -> register (only for new clients). On success the
+/// router redirect returns the user to [returnTo] (auth gate return intent).
 class AuthScreen extends StatefulWidget {
   const AuthScreen({
     this.returnTo,
@@ -25,7 +25,7 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-enum _AuthStep { phone, code }
+enum _AuthStep { phone, code, register }
 
 class _AuthScreenState extends State<AuthScreen> {
   final _phoneController = TextEditingController(text: '+7');
@@ -35,7 +35,6 @@ class _AuthScreenState extends State<AuthScreen> {
   _AuthStep _step = _AuthStep.phone;
   ActionStatus _status = ActionStatus.idle;
   String? _inlineError;
-  bool _nameRequired = false;
   bool _consentAccepted = false;
 
   int _resendSecondsLeft = 0;
@@ -71,6 +70,16 @@ class _AuthScreenState extends State<AuthScreen> {
     });
   }
 
+  void _resetToPhone() {
+    setState(() {
+      _step = _AuthStep.phone;
+      _codeController.clear();
+      _nameController.clear();
+      _inlineError = null;
+      _consentAccepted = false;
+    });
+  }
+
   Future<void> _sendOtp() async {
     if (!_isPhoneValid) {
       setState(() => _inlineError = 'Введите телефон в формате +79991234567');
@@ -87,6 +96,8 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() {
         _step = _AuthStep.code;
         _status = ActionStatus.idle;
+        _nameController.clear();
+        _consentAccepted = false;
       });
       _startResendCountdown(60);
     } on Object catch (error) {
@@ -97,7 +108,6 @@ class _AuthScreenState extends State<AuthScreen> {
         _inlineError = failure.uiMessage;
       });
       if (failure.code == ApiErrorCode.rateLimit && failure.retryAfter != null) {
-        // Rate limit on send: user can go to code entry only after retry_after.
         _startResendCountdown(failure.retryAfter!);
       }
     }
@@ -111,22 +121,10 @@ class _AuthScreenState extends State<AuthScreen> {
     showAppSnack(context, 'Код отправлен повторно');
   }
 
-  Future<void> _verify() async {
+  Future<void> _verifyOtp({String? name}) async {
     final code = _codeController.text.trim();
     if (code.length < 4) {
       setState(() => _inlineError = 'Введите код из SMS');
-      return;
-    }
-    final name = _nameController.text.trim();
-    if (_nameRequired && name.isEmpty) {
-      setState(() => _inlineError = 'Для первого входа укажите имя');
-      return;
-    }
-    if (name.isNotEmpty && !_consentAccepted) {
-      setState(
-        () => _inlineError =
-            'Для регистрации подтвердите согласие с условиями и политикой',
-      );
       return;
     }
 
@@ -140,7 +138,7 @@ class _AuthScreenState extends State<AuthScreen> {
       final pair = await deps.authRepository.verifyOtp(
         phone: _phone,
         code: code,
-        name: name.isEmpty ? null : name,
+        name: name,
       );
       await deps.sessionController.signIn(pair);
       // Navigation happens via the router redirect (return intent).
@@ -149,11 +147,11 @@ class _AuthScreenState extends State<AuthScreen> {
       final failure = toAppFailure(error);
       setState(() {
         _status = ActionStatus.idle;
-        if (failure.code == ApiErrorCode.validationError &&
+        if (_step == _AuthStep.code &&
+            failure.code == ApiErrorCode.validationError &&
             failure.message.toLowerCase().contains('name')) {
-          // New client: the server demands a name.
-          _nameRequired = true;
-          _inlineError = 'Вы у нас впервые — укажите имя, чтобы зарегистрироваться';
+          _step = _AuthStep.register;
+          _inlineError = null;
         } else {
           _inlineError = failure.uiMessage;
         }
@@ -164,13 +162,43 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  Future<void> _submitCode() => _verifyOtp();
+
+  Future<void> _submitRegistration() async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      setState(() => _inlineError = 'Укажите имя');
+      return;
+    }
+    if (!_consentAccepted) {
+      setState(
+        () => _inlineError =
+            'Подтвердите согласие с условиями и политикой обработки данных',
+      );
+      return;
+    }
+    await _verifyOtp(name: name);
+  }
+
+  String get _headline => switch (_step) {
+        _AuthStep.phone => 'Введите номер телефона',
+        _AuthStep.code => 'Введите код из SMS',
+        _AuthStep.register => 'Регистрация',
+      };
+
+  String get _subtitle => switch (_step) {
+        _AuthStep.phone => 'Отправим SMS с кодом подтверждения.',
+        _AuthStep.code => 'Код отправлен на $_phone',
+        _AuthStep.register => 'Вы у нас впервые — укажите имя, чтобы продолжить.',
+      };
+
   @override
   Widget build(BuildContext context) {
     final submitting = _status == ActionStatus.submitting;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Вход'),
+        title: Text(_step == _AuthStep.register ? 'Регистрация' : 'Вход'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           tooltip: 'К заездам',
@@ -182,22 +210,16 @@ class _AuthScreenState extends State<AuthScreen> {
           padding: const EdgeInsets.all(ApexSpacing.lg),
           children: [
             Text(
-              _step == _AuthStep.phone
-                  ? 'Введите номер телефона'
-                  : 'Введите код из SMS',
+              _headline,
               style: Theme.of(context)
                   .textTheme
                   .headlineSmall
                   ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: ApexSpacing.sm),
-            Text(
-              _step == _AuthStep.phone
-                  ? 'Отправим SMS с кодом подтверждения.'
-                  : 'Код отправлен на $_phone',
-            ),
+            Text(_subtitle),
             const SizedBox(height: ApexSpacing.lg),
-            if (_step == _AuthStep.phone) ...[
+            if (_step == _AuthStep.phone)
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
@@ -208,8 +230,8 @@ class _AuthScreenState extends State<AuthScreen> {
                   hintText: '+79991234567',
                 ),
                 onSubmitted: (_) => _sendOtp(),
-              ),
-            ] else ...[
+              )
+            else if (_step == _AuthStep.code)
               TextField(
                 controller: _codeController,
                 keyboardType: TextInputType.number,
@@ -220,18 +242,19 @@ class _AuthScreenState extends State<AuthScreen> {
                   labelText: 'Код из SMS',
                   counterText: '',
                 ),
-                onSubmitted: (_) => _verify(),
-              ),
-              const SizedBox(height: ApexSpacing.md),
+                onSubmitted: (_) => _submitCode(),
+              )
+            else ...[
               TextField(
                 controller: _nameController,
+                autofocus: true,
                 enabled: !submitting,
                 maxLength: 80,
-                decoration: InputDecoration(
-                  labelText:
-                      _nameRequired ? 'Имя (обязательно)' : 'Имя (для новых клиентов)',
+                decoration: const InputDecoration(
+                  labelText: 'Ваше имя',
                   counterText: '',
                 ),
+                onSubmitted: (_) => _submitRegistration(),
               ),
               const SizedBox(height: ApexSpacing.sm),
               CheckboxListTile(
@@ -267,9 +290,9 @@ class _AuthScreenState extends State<AuthScreen> {
                           : 'Получить код',
                 ),
               )
-            else ...[
+            else if (_step == _AuthStep.code) ...[
               FilledButton(
-                onPressed: submitting ? null : _verify,
+                onPressed: submitting ? null : _submitCode,
                 child: Text(submitting ? 'Проверяем…' : 'Войти'),
               ),
               const SizedBox(height: ApexSpacing.sm),
@@ -282,14 +305,17 @@ class _AuthScreenState extends State<AuthScreen> {
                 ),
               ),
               TextButton(
-                onPressed: submitting
-                    ? null
-                    : () => setState(() {
-                          _step = _AuthStep.phone;
-                          _codeController.clear();
-                          _inlineError = null;
-                          _nameRequired = false;
-                        }),
+                onPressed: submitting ? null : _resetToPhone,
+                child: const Text('Изменить номер'),
+              ),
+            ] else ...[
+              FilledButton(
+                onPressed: submitting ? null : _submitRegistration,
+                child: Text(submitting ? 'Регистрируем…' : 'Зарегистрироваться'),
+              ),
+              const SizedBox(height: ApexSpacing.sm),
+              TextButton(
+                onPressed: submitting ? null : _resetToPhone,
                 child: const Text('Изменить номер'),
               ),
             ],

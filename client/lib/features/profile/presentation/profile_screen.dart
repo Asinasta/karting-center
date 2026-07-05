@@ -5,6 +5,7 @@ import '../../../app/app_router.dart';
 import '../../../app/app_scope.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/theme/apex_tokens.dart';
+import '../../../core/ui/apex_dialog.dart';
 import '../../../core/ui/load_state.dart';
 import '../../../core/ui/screen_states.dart';
 import '../../../core/ui/snackbars.dart';
@@ -58,27 +59,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _editName(Profile profile) async {
     final controller = TextEditingController(text: profile.name);
-    final newName = await showDialog<String>(
+    final newName = await showApexDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Имя'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: 80,
-          decoration: const InputDecoration(labelText: 'Ваше имя'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Отмена'),
+      builder: (dialogContext) {
+        return ApexDialogScaffold(
+          title: 'Имя',
+          body: TextField(
+            controller: controller,
+            autofocus: true,
+            maxLength: 80,
+            decoration: const InputDecoration(labelText: 'Ваше имя'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: const Text('Сохранить'),
-          ),
-        ],
-      ),
+          actions: [
+            ApexDialogAction(
+              label: 'Сохранить',
+              onPressed: () =>
+                  Navigator.of(dialogContext).pop(controller.text.trim()),
+            ),
+            ApexDialogAction(
+              label: 'Отмена',
+              kind: ApexDialogActionKind.secondary,
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+          ],
+        );
+      },
     );
     if (newName == null || newName.isEmpty || newName == profile.name || !mounted) {
       return;
@@ -248,10 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const ListTile(
                 leading: Icon(Icons.notifications_outlined),
                 title: Text('Уведомления'),
-                subtitle: Text(
-                  'Push об отменах и напоминания. Разрешение запрашивается '
-                  'после первой записи; управлять им можно в настройках системы.',
-                ),
+                subtitle: Text('Push об отменах и напоминания'),
               ),
               const Divider(height: 1),
               ListTile(

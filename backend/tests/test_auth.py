@@ -13,6 +13,12 @@ def test_new_client_requires_name(client):
     resp = client.post("/auth/verify", json={"phone": "+79995550000", "code": "0000"})
     assert resp.status_code == 400
     assert resp.json()["code"] == "validation_error"
+    # OTP stays valid: registration can finish on the next verify with the same code.
+    second = client.post(
+        "/auth/verify",
+        json={"phone": "+79995550000", "code": "0000", "name": "Новый"},
+    )
+    assert second.status_code == 200
 
 
 def test_new_client_with_name(client):

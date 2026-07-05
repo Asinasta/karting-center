@@ -69,7 +69,10 @@ GoRouter createAppRouter(AppDependencies dependencies) {
       ),
       GoRoute(
         path: '/slots',
-        builder: (context, state) => const SlotListScreen(),
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: const SlotListScreen(),
+        ),
         routes: [
           GoRoute(
             path: ':slotId',
@@ -89,7 +92,10 @@ GoRouter createAppRouter(AppDependencies dependencies) {
       ),
       GoRoute(
         path: '/bookings',
-        builder: (context, state) => const BookingListScreen(),
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: const BookingListScreen(),
+        ),
         routes: [
           GoRoute(
             path: ':bookingId',
@@ -101,7 +107,10 @@ GoRouter createAppRouter(AppDependencies dependencies) {
       ),
       GoRoute(
         path: '/profile',
-        builder: (context, state) => const ProfileScreen(),
+        pageBuilder: (context, state) => NoTransitionPage<void>(
+          key: state.pageKey,
+          child: const ProfileScreen(),
+        ),
       ),
     ],
   );

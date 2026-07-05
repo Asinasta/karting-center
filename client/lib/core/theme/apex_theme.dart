@@ -13,6 +13,7 @@ class ApexTheme {
       primary: ApexColors.trackRed,
       secondary: ApexColors.signalAmber,
       surface: ApexColors.surface,
+      surfaceTint: Colors.transparent,
       outline: ApexColors.outline,
     );
 
@@ -20,6 +21,21 @@ class ApexTheme {
       useMaterial3: true,
       colorScheme: scheme,
       scaffoldBackgroundColor: ApexColors.paper,
+      dialogTheme: const DialogThemeData(
+        backgroundColor: ApexColors.surface,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(ApexRadius.lg)),
+        ),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: ApexColors.surface,
+        surfaceTintColor: Colors.transparent,
+      ),
+      datePickerTheme: const DatePickerThemeData(
+        backgroundColor: ApexColors.surface,
+        surfaceTintColor: Colors.transparent,
+      ),
       appBarTheme: const AppBarTheme(
         centerTitle: false,
         backgroundColor: ApexColors.paper,
@@ -44,8 +60,23 @@ class ApexTheme {
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: ApexColors.surface,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: ApexSpacing.md,
+          vertical: ApexSpacing.md,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(ApexRadius.sm),
+          borderSide: const BorderSide(color: ApexColors.outline),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ApexRadius.sm),
+          borderSide: const BorderSide(color: ApexColors.outline),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(ApexRadius.sm),
+          borderSide: const BorderSide(color: ApexColors.trackRed, width: 2),
         ),
       ),
       navigationBarTheme: const NavigationBarThemeData(

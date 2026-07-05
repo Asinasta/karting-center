@@ -4,6 +4,7 @@ import '../../../app/app_scope.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/theme/apex_tokens.dart';
 import '../../../core/ui/formats.dart';
+import '../domain/period_preset.dart';
 import '../domain/slot_filter.dart';
 import '../domain/slot_models.dart';
 
@@ -15,6 +16,7 @@ Future<SlotFilter?> showFiltersSheet(BuildContext context, SlotFilter current) {
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
+    backgroundColor: ApexColors.surface,
     builder: (context) => FractionallySizedBox(
       heightFactor: 0.85,
       child: _FiltersSheet(initial: current),
@@ -32,8 +34,13 @@ class _FiltersSheet extends StatefulWidget {
 }
 
 class _FiltersSheetState extends State<_FiltersSheet> {
-  late DateTime? _dateFrom = widget.initial.dateFrom;
-  late DateTime? _dateTo = widget.initial.dateTo;
+  late PeriodPreset _preset = detectPreset(
+    widget.initial.dateFrom,
+    widget.initial.dateTo,
+    DateTime.now(),
+  );
+  late DateTime? _customFrom = widget.initial.dateFrom;
+  late DateTime? _customTo = widget.initial.dateTo;
   late Set<TrackConfigType> _types = {...widget.initial.trackConfigTypes};
   late Set<String> _marshalIds = {...widget.initial.marshalIds};
   late bool _onlyAvailable = widget.initial.onlyAvailable;
@@ -59,31 +66,72 @@ class _FiltersSheetState extends State<_FiltersSheet> {
     }
   }
 
-  Future<void> _pickPeriod() async {
+  void _selectPreset(PeriodPreset preset) {
+    setState(() {
+      _preset = preset;
+      if (preset != PeriodPreset.custom) {
+        _customFrom = null;
+        _customTo = null;
+      }
+    });
+    if (preset == PeriodPreset.custom) {
+      _pickCustomRange();
+    }
+  }
+
+  Future<void> _pickCustomRange() async {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final range = await showDateRangePicker(
       context: context,
       firstDate: now.subtract(const Duration(days: 1)),
       lastDate: now.add(const Duration(days: 90)),
-      initialDateRange: _dateFrom != null && _dateTo != null
-          ? DateTimeRange(start: _dateFrom!, end: _dateTo!)
-          : null,
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      initialDateRange: _customFrom != null && _customTo != null
+          ? DateTimeRange(start: _customFrom!, end: _customTo!)
+          : DateTimeRange(start: today, end: today.add(const Duration(days: 7))),
       helpText: 'Период заездов',
-      saveText: 'Выбрать',
+      confirmText: 'Выбрать',
+      cancelText: 'Отмена',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            datePickerTheme: DatePickerThemeData(
+              headerHeadlineStyle: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (range == null || !mounted) {
+      if (_customFrom == null && _customTo == null) {
+        setState(() => _preset = PeriodPreset.next7Days);
+      }
       return;
     }
     setState(() {
-      _dateFrom = DateTime(range.start.year, range.start.month, range.start.day);
-      _dateTo = DateTime(range.end.year, range.end.month, range.end.day, 23, 59, 59);
+      _preset = PeriodPreset.custom;
+      _customFrom = DateTime(range.start.year, range.start.month, range.start.day);
+      _customTo = DateTime(
+        range.end.year,
+        range.end.month,
+        range.end.day,
+        23,
+        59,
+        59,
+      );
     });
   }
 
   void _reset() {
     setState(() {
-      _dateFrom = null;
-      _dateTo = null;
+      _preset = PeriodPreset.next7Days;
+      _customFrom = null;
+      _customTo = null;
       _types = {};
       _marshalIds = {};
       _onlyAvailable = false;
@@ -91,10 +139,16 @@ class _FiltersSheetState extends State<_FiltersSheet> {
   }
 
   void _apply() {
+    final dates = presetToFilterDates(
+      preset: _preset,
+      customFrom: _customFrom,
+      customTo: _customTo,
+      now: DateTime.now(),
+    );
     Navigator.of(context).pop(
       SlotFilter(
-        dateFrom: _dateFrom,
-        dateTo: _dateTo,
+        dateFrom: dates.dateFrom,
+        dateTo: dates.dateTo,
         trackConfigTypes: _types,
         marshalIds: _marshalIds,
         onlyAvailable: _onlyAvailable,
@@ -128,29 +182,32 @@ class _FiltersSheetState extends State<_FiltersSheet> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: ApexSpacing.lg),
             children: [
-              _SectionTitle('Период'),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.date_range_outlined),
-                title: Text(
-                  _dateFrom == null
-                      ? 'Ближайшие 7 дней (по умолчанию)'
-                      : '${formatShortDate(_dateFrom!)} — ${formatShortDate(_dateTo ?? _dateFrom!)}',
-                ),
-                trailing: _dateFrom == null
-                    ? const Icon(Icons.chevron_right)
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        tooltip: 'Вернуть период по умолчанию',
-                        onPressed: () => setState(() {
-                          _dateFrom = null;
-                          _dateTo = null;
-                        }),
-                      ),
-                onTap: _pickPeriod,
+              const _SectionTitle('Период'),
+              Wrap(
+                spacing: ApexSpacing.sm,
+                runSpacing: ApexSpacing.xs,
+                children: PeriodPreset.values.map((preset) {
+                  final selected = _preset == preset;
+                  return FilterChip(
+                    label: Text(preset.label),
+                    selected: selected,
+                    onSelected: (value) {
+                      if (value) _selectPreset(preset);
+                    },
+                  );
+                }).toList(),
               ),
+              if (_preset == PeriodPreset.custom &&
+                  _customFrom != null &&
+                  _customTo != null) ...[
+                const SizedBox(height: ApexSpacing.xs),
+                Text(
+                  '${formatShortDate(_customFrom!)} — ${formatShortDate(_customTo!)}',
+                  style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+                ),
+              ],
               const SizedBox(height: ApexSpacing.md),
-              _SectionTitle('Тип трассы'),
+              const _SectionTitle('Тип трассы'),
               Wrap(
                 spacing: ApexSpacing.sm,
                 children: TrackConfigType.values.map((type) {
@@ -169,7 +226,7 @@ class _FiltersSheetState extends State<_FiltersSheet> {
                 }).toList(),
               ),
               const SizedBox(height: ApexSpacing.md),
-              _SectionTitle('Маршал'),
+              const _SectionTitle('Маршал'),
               if (_marshals == null && _marshalsError == null)
                 const Padding(
                   padding: EdgeInsets.all(ApexSpacing.md),
