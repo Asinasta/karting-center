@@ -16,7 +16,13 @@ SCR-006, BS-004.
 - `status` ∈ `{active, completed}`
 - Бронь не отменена (`cancelled`, `late_cancel`, `cancelled_by_center`)
 - `now >= slot.start_at`
-- На бронь ещё нет `marshal_rating`
+- На бронь ещё нет `marshal_rating` (для POST)
+
+## Редактирование
+
+- `PATCH /bookings/{bookingId}/marshal-rating` — те же поля `{ stars, comment? }`
+- Доступно, если `marshal_rating` уже есть и бронь по-прежнему eligible (см. выше)
+- `created_at` сохраняется; меняются только `stars` и `comment`
 
 ## Ошибки
 

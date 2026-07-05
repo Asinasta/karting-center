@@ -93,6 +93,15 @@ class BookingPort(ABC):
         now: datetime,
     ) -> Booking: ...
 
+    @abstractmethod
+    def update_marshal_rating(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking: ...
+
 
 class ProfilePort(ABC):
     @abstractmethod

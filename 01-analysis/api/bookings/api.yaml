@@ -215,6 +215,53 @@ paths:
             application/json:
               schema:
                 $ref: '../common/models.yaml#/components/schemas/Error'
+    patch:
+      operationId: updateMarshalRating
+      summary: Update marshal rating after a ride
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './models.yaml#/components/schemas/CreateMarshalRatingRequest'
+      responses:
+        '200':
+          description: Updated booking with marshal_rating
+          content:
+            application/json:
+              schema:
+                $ref: './models.yaml#/components/schemas/Booking'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '403':
+          description: Booking belongs to another client
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '404':
+          description: Booking or rating not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
+        '422':
+          description: Booking not eligible for rating or invalid stars
+          content:
+            application/json:
+              schema:
+                $ref: '../common/models.yaml#/components/schemas/Error'
 components:
   securitySchemes:
     bearerAuth:

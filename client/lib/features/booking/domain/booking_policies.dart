@@ -119,4 +119,18 @@ class RatingPolicy {
     }
     return !now.isBefore(booking.slot.startAt);
   }
+
+  static bool canEdit(Booking booking, DateTime now) {
+    if (booking.marshalRating == null) {
+      return false;
+    }
+    if (booking.status.isCancelledKind) {
+      return false;
+    }
+    if (booking.status != BookingStatus.active &&
+        booking.status != BookingStatus.completed) {
+      return false;
+    }
+    return !now.isBefore(booking.slot.startAt);
+  }
 }

@@ -25,6 +25,16 @@ def test_rate_marshal_on_completed_booking(client):
     assert body["marshal_rating"]["stars"] == 5
     assert body["marshal_rating"]["comment"] == "Супер маршал"
 
+    updated = client.patch(
+        f"/bookings/{booking['id']}/marshal-rating",
+        json={"stars": 4, "comment": "Обновлённый комментарий"},
+        headers=headers,
+    )
+    assert updated.status_code == 200, updated.text
+    patched = updated.json()
+    assert patched["marshal_rating"]["stars"] == 4
+    assert patched["marshal_rating"]["comment"] == "Обновлённый комментарий"
+
     duplicate = client.post(
         f"/bookings/{booking['id']}/marshal-rating",
         json={"stars": 4},

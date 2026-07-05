@@ -766,6 +766,32 @@ class FixturesAdapter(Backend):
             )
             return self._booking_contract(record)
 
+    def update_marshal_rating(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking:
+        with self._lock:
+            record = self._owned_booking(client_id, booking_id)
+            existing = self._marshal_ratings.get(booking_id)
+            if existing is None:
+                raise ApiError("not_found", "Marshal rating not found for this booking")
+            if not can_rate_marshal(
+                status=record.status,
+                start_at=record.slot_snapshot.start_at,
+                now=now,
+            ):
+                raise ApiError(
+                    "rating_not_eligible",
+                    "Booking is not eligible for marshal rating",
+                )
+
+            existing.stars = req.stars
+            existing.comment = req.comment
+            return self._booking_contract(record)
+
     # ---------------------------------------------------------- ProfilePort
     def get_profile(self, client_id: UUID) -> Profile:
         with self._lock:

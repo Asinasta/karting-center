@@ -83,6 +83,15 @@ class ExistingBackendAdapter(_NotImplementedBackend):
     ) -> Booking:
         self._todo("rate_marshal")
 
+    def update_marshal_rating(
+        self,
+        client_id: UUID,
+        booking_id: UUID,
+        req: CreateMarshalRatingRequest,
+        now: datetime,
+    ) -> Booking:
+        self._todo("update_marshal_rating")
+
     def get_profile(self, client_id: UUID) -> Profile:
         self._todo("get_profile")
 

@@ -79,18 +79,26 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   Future<void> _submitRating(Booking booking, int stars, String? comment) async {
     setState(() => _ratingAction = ActionStatus.submitting);
+    final repo = AppScope.of(context).bookingRepository;
+    final isEdit = booking.marshalRating != null;
     try {
-      final updated = await AppScope.of(context).bookingRepository.rateMarshal(
-            bookingId: booking.id,
-            stars: stars,
-            comment: comment,
-          );
+      final updated = isEdit
+          ? await repo.updateMarshalRating(
+              bookingId: booking.id,
+              stars: stars,
+              comment: comment,
+            )
+          : await repo.rateMarshal(
+              bookingId: booking.id,
+              stars: stars,
+              comment: comment,
+            );
       if (!mounted) return;
       setState(() {
         _state = Content(updated);
         _ratingAction = ActionStatus.idle;
       });
-      showAppSnack(context, 'Спасибо за оценку');
+      showAppSnack(context, isEdit ? 'Оценка обновлена' : 'Спасибо за оценку');
     } on Object catch (error) {
       if (!mounted) return;
       setState(() => _ratingAction = ActionStatus.idle);
@@ -133,7 +141,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     final textTheme = Theme.of(context).textTheme;
     final slot = booking.slot;
     final canCancel = CancellationPolicy.canCancel(booking, DateTime.now());
-    final canRate = RatingPolicy.canRate(booking, DateTime.now());
+    final now = DateTime.now();
+    final canRate = RatingPolicy.canRate(booking, now);
+    final canEditRating = RatingPolicy.canEdit(booking, now);
     final centerCancelled = booking.status == BookingStatus.cancelledByCenter ||
         slot.status == SlotStatus.cancelled;
 
@@ -233,14 +243,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             label: const Text('Карта трассы'),
           ),
           const SizedBox(height: ApexSpacing.lg),
-          if (canRate || booking.marshalRating != null)
+          if (canRate || canEditRating || booking.marshalRating != null)
             MarshalRatingSection(
               marshalName: slot.marshal.name,
               rating: booking.marshalRating,
+              canEdit: canEditRating,
               submitting: _ratingAction == ActionStatus.submitting,
               onSubmit: (stars, comment) => _submitRating(booking, stars, comment),
             ),
-          if (canRate || booking.marshalRating != null)
+          if (canRate || canEditRating || booking.marshalRating != null)
             const SizedBox(height: ApexSpacing.lg),
           if (canCancel)
             FilledButton(

@@ -249,7 +249,7 @@ void main() {
     final startAt = DateTime.utc(2026, 7, 10, 12);
     final now = DateTime.utc(2026, 7, 10, 13);
 
-    test('allows rating after start for completed booking without rating', () {
+    test('allows rating after start when no rating yet', () {
       expect(
         RatingPolicy.canRate(
           _booking(status: BookingStatus.completed, startAt: startAt),
@@ -301,6 +301,39 @@ void main() {
         ),
         isFalse,
       );
+    });
+
+    test('allows editing an existing rating after start', () {
+      final booking = Booking(
+        id: 'booking-1',
+        slot: BookingSlotSnapshot(
+          id: 'slot-1',
+          trackConfig: const TrackConfig(
+            id: 'track-1',
+            name: 'Test track',
+            type: TrackConfigType.novice,
+            capacityCap: 8,
+          ),
+          marshal: const Marshal(id: 'marshal-1', name: 'Иван'),
+          startAt: startAt,
+          price: const Money(amount: 150000, currency: 'RUB'),
+          rentalPrice: const Money(amount: 50000, currency: 'RUB'),
+          meetingPoint: 'Главный вход',
+          status: SlotStatus.scheduled,
+        ),
+        seatsCount: 1,
+        rentalCount: 0,
+        seatGear: const [GearChoice.own],
+        priceTotal: const Money(amount: 150000, currency: 'RUB'),
+        status: BookingStatus.completed,
+        createdAt: DateTime.utc(2026),
+        marshalRating: MarshalRating(
+          stars: 5,
+          createdAt: DateTime.utc(2026, 7, 10, 14),
+        ),
+      );
+      expect(RatingPolicy.canRate(booking, now), isFalse);
+      expect(RatingPolicy.canEdit(booking, now), isTrue);
     });
   });
 }

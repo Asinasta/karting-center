@@ -11,11 +11,13 @@ class MarshalRatingSection extends StatefulWidget {
     required this.submitting,
     required this.onSubmit,
     this.rating,
+    this.canEdit = false,
     super.key,
   });
 
   final String marshalName;
   final bool submitting;
+  final bool canEdit;
   final MarshalRating? rating;
   final Future<void> Function(int stars, String? comment) onSubmit;
 
@@ -25,7 +27,27 @@ class MarshalRatingSection extends StatefulWidget {
 
 class _MarshalRatingSectionState extends State<MarshalRatingSection> {
   int _stars = 0;
+  bool _editing = false;
   final _commentController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _syncFromRating(widget.rating);
+  }
+
+  @override
+  void didUpdateWidget(covariant MarshalRatingSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.rating != widget.rating && !_editing) {
+      _syncFromRating(widget.rating);
+    }
+  }
+
+  void _syncFromRating(MarshalRating? rating) {
+    _stars = rating?.stars ?? 0;
+    _commentController.text = rating?.comment ?? '';
+  }
 
   @override
   void dispose() {
@@ -43,12 +65,20 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
       _stars,
       comment.isEmpty ? null : comment,
     );
+    if (!mounted) return;
+    setState(() => _editing = false);
+  }
+
+  void _startEditing() {
+    _syncFromRating(widget.rating);
+    setState(() => _editing = true);
   }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final rating = widget.rating;
+    final showForm = rating == null || _editing;
 
     return Card(
       child: Padding(
@@ -66,16 +96,7 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
               style: textTheme.bodyLarge,
             ),
             const SizedBox(height: ApexSpacing.sm),
-            if (rating != null) ...[
-              _StarRow(stars: rating.stars, interactive: false),
-              if (rating.comment != null && rating.comment!.isNotEmpty) ...[
-                const SizedBox(height: ApexSpacing.sm),
-                Text(
-                  rating.comment!,
-                  style: textTheme.bodyMedium,
-                ),
-              ],
-            ] else ...[
+            if (showForm) ...[
               _StarRow(
                 stars: _stars,
                 interactive: !widget.submitting,
@@ -94,10 +115,51 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
                 ),
               ),
               const SizedBox(height: ApexSpacing.sm),
-              FilledButton(
-                onPressed: widget.submitting ? null : _submit,
-                child: Text(widget.submitting ? 'Отправляем…' : 'Отправить оценку'),
+              Row(
+                children: [
+                  if (_editing) ...[
+                    TextButton(
+                      onPressed: widget.submitting
+                          ? null
+                          : () => setState(() {
+                                _editing = false;
+                                _syncFromRating(widget.rating);
+                              }),
+                      child: const Text('Отмена'),
+                    ),
+                    const SizedBox(width: ApexSpacing.sm),
+                  ],
+                  FilledButton(
+                    onPressed: widget.submitting ? null : _submit,
+                    child: Text(
+                      widget.submitting
+                          ? 'Сохраняем…'
+                          : _editing
+                              ? 'Сохранить'
+                              : 'Отправить оценку',
+                    ),
+                  ),
+                ],
               ),
+            ] else ...[
+              _StarRow(stars: rating!.stars, interactive: false),
+              if (rating.comment != null && rating.comment!.isNotEmpty) ...[
+                const SizedBox(height: ApexSpacing.sm),
+                Text(
+                  rating.comment!,
+                  style: textTheme.bodyMedium,
+                ),
+              ],
+              if (widget.canEdit) ...[
+                const SizedBox(height: ApexSpacing.sm),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: widget.submitting ? null : _startEditing,
+                    child: const Text('Изменить'),
+                  ),
+                ),
+              ],
             ],
           ],
         ),

@@ -24,6 +24,13 @@ abstract class BookingRepository {
     required int stars,
     String? comment,
   });
+
+  /// `updateMarshalRating`: PATCH /bookings/{bookingId}/marshal-rating
+  Future<Booking> updateMarshalRating({
+    required String bookingId,
+    required int stars,
+    String? comment,
+  });
 }
 
 class ApiBookingRepository implements BookingRepository {
@@ -80,6 +87,23 @@ class ApiBookingRepository implements BookingRepository {
     String? comment,
   }) async {
     final payload = await _apiClient.post(
+      '/bookings/$bookingId/marshal-rating',
+      body: {
+        'stars': stars,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      },
+      authorized: true,
+    );
+    return Booking.fromJson(payload! as Map<String, Object?>);
+  }
+
+  @override
+  Future<Booking> updateMarshalRating({
+    required String bookingId,
+    required int stars,
+    String? comment,
+  }) async {
+    final payload = await _apiClient.patch(
       '/bookings/$bookingId/marshal-rating',
       body: {
         'stars': stars,
