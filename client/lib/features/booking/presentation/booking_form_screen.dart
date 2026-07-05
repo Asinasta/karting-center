@@ -117,13 +117,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     });
   }
 
-  /// Own gear changes total seats while keeping rental count fixed.
+  /// Own gear at fixed total seats: adjusts rental count inversely.
   void _setOwnCount(Slot slot, int own) {
-    setState(() {
-      _totalSeats = own + _rentalCount;
-      _clampSelection(slot);
-      _resetIdempotencyKey();
-    });
+    _setRentalCount(slot, _totalSeats - own);
   }
 
   Future<void> _submit(Slot slot) async {
@@ -221,7 +217,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final submitting = _action == ActionStatus.submitting;
     final maxRental = min(_totalSeats, slot.freeRentalGear);
     final ownCount = _totalSeats - _rentalCount;
-    final maxOwn = maxSeats - _rentalCount;
+    final minOwn = _totalSeats - maxRental;
 
     final preview = BookingPricePreviewCalculator.preview(
       price: slot.price,
@@ -301,7 +297,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
           ),
           const SizedBox(height: ApexSpacing.xs),
           Text(
-            'Своя: $ownCount · прокат: $_rentalCount',
+            'Своя: $ownCount · прокат: $_rentalCount · всего $_totalSeats',
             style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
           ),
           const SizedBox(height: ApexSpacing.sm),
@@ -316,8 +312,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   _CounterRow(
                     label: 'Своя экипировка',
                     value: ownCount,
-                    min: 0,
-                    max: maxOwn,
+                    min: minOwn,
+                    max: _totalSeats,
                     enabled: !submitting,
                     onChanged: (own) => _setOwnCount(slot, own),
                   ),
