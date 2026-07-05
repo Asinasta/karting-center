@@ -33,13 +33,16 @@ cd C:\Users\Asinasta\Downloads\karting-center\backend
 
 ## Run
 
-Android emulator использует `10.0.2.2` для доступа к localhost хоста. Это значение уже стоит по умолчанию:
+По умолчанию клиент сам выбирает URL API:
+
+- **Web / Windows / macOS / Linux** → `http://localhost:8080`
+- **Android emulator** → `http://10.0.2.2:8080`
 
 ```powershell
-flutter run
+flutter run -d chrome
 ```
 
-Для web/desktop укажи `localhost`:
+Переопределить вручную:
 
 ```powershell
 flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8080
