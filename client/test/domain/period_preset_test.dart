@@ -16,12 +16,6 @@ void main() {
     expect(range.to, DateTime(2026, 7, 6, 23, 59, 59));
   });
 
-  test('this week preset ends on Sunday and starts at now', () {
-    final range = rangeForPreset(PeriodPreset.thisWeek, now);
-    expect(range.from, now);
-    expect(range.to, DateTime(2026, 7, 5, 23, 59, 59));
-  });
-
   test('weekend on Sunday is only today', () {
     final range = rangeForPreset(PeriodPreset.thisWeekend, now);
     expect(range.from, DateTime(2026, 7, 5));

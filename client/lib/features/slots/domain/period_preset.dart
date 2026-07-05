@@ -3,7 +3,6 @@ enum PeriodPreset {
   today,
   tomorrow,
   next7Days,
-  thisWeek,
   thisWeekend,
   rollingMonth,
   custom,
@@ -13,8 +12,7 @@ extension PeriodPresetLabel on PeriodPreset {
   String get label => switch (this) {
         PeriodPreset.today => 'Сегодня',
         PeriodPreset.tomorrow => 'Завтра',
-        PeriodPreset.next7Days => 'Ближайшие 7 дней',
-        PeriodPreset.thisWeek => 'На этой неделе',
+        PeriodPreset.next7Days => 'На неделю вперёд',
         PeriodPreset.thisWeekend => 'В эти выходные',
         PeriodPreset.rollingMonth => 'Ближайший месяц',
         PeriodPreset.custom => 'Выбрать даты',
@@ -48,10 +46,6 @@ PeriodRange rangeForPreset(PeriodPreset preset, DateTime now) {
       return PeriodRange(from: day, to: endOfDay(day));
     case PeriodPreset.next7Days:
       throw ArgumentError('next7Days uses server default (no explicit dates)');
-    case PeriodPreset.thisWeek:
-      final daysUntilSunday = DateTime.sunday - now.weekday;
-      final sunday = today.add(Duration(days: daysUntilSunday));
-      return PeriodRange(from: now, to: endOfDay(sunday));
     case PeriodPreset.thisWeekend:
       return _thisWeekendRange(today, now.weekday);
     case PeriodPreset.rollingMonth:
@@ -96,13 +90,6 @@ PeriodPreset detectPreset(DateTime? dateFrom, DateTime? dateTo, DateTime now) {
       continue;
     }
     final expected = rangeForPreset(preset, now);
-    if (preset == PeriodPreset.thisWeek) {
-      if (_sameDay(dateTo, expected.to) &&
-          !dateFrom.toLocal().isAfter(expected.to)) {
-        return PeriodPreset.thisWeek;
-      }
-      continue;
-    }
     if (_sameDay(dateFrom, expected.from) && _sameDay(dateTo, expected.to)) {
       return preset;
     }
