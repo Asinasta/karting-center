@@ -270,7 +270,7 @@ backend/
 - Request body: `slot_id`, `seat_gear[]`.
 - Вычислять `seats_count = len(seat_gear)`.
 - Вычислять `rental_count = count(rental)`.
-- Валидировать `1 <= seats_count <= 3`.
+- Валидировать `1 <= seats_count <= min(free_seats, capacity_cap)`.
 - Отклонять отменённый слот через `slot_cancelled`.
 - Отклонять начавшийся слот через `slot_started`.
 - Отклонять нехватку мест/экипировки через `slot_full`.

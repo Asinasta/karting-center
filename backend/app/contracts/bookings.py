@@ -14,6 +14,7 @@ from .slots import TrackConfig
 
 GearChoice = Literal["own", "rental"]
 BookingStatus = Literal["active", "cancelled", "late_cancel", "cancelled_by_center", "completed"]
+MAX_BOOKING_SEATS = 14
 
 
 class BookingSlotSnapshot(BaseModel):
@@ -34,9 +35,9 @@ class BookingSlotSnapshot(BaseModel):
 class Booking(BaseModel):
     id: UUID
     slot: BookingSlotSnapshot
-    seats_count: int = Field(ge=1, le=3)
-    rental_count: int = Field(ge=0, le=3)
-    seat_gear: list[GearChoice] = Field(min_length=1, max_length=3)
+    seats_count: int = Field(ge=1, le=MAX_BOOKING_SEATS)
+    rental_count: int = Field(ge=0, le=MAX_BOOKING_SEATS)
+    seat_gear: list[GearChoice] = Field(min_length=1, max_length=MAX_BOOKING_SEATS)
     price_total: Money
     status: BookingStatus
     created_at: datetime
@@ -46,7 +47,7 @@ class Booking(BaseModel):
 
 class CreateBookingRequest(BaseModel):
     slot_id: UUID
-    seat_gear: list[GearChoice] = Field(min_length=1, max_length=3)
+    seat_gear: list[GearChoice] = Field(min_length=1, max_length=MAX_BOOKING_SEATS)
 
 
 class BookingList(BaseModel):

@@ -75,7 +75,7 @@
 | id | UUID | Идентификатор брони |
 | client_id | UUID | Владелец брони |
 | slot | BookingSlotSnapshot | Snapshot параметров слота для истории брони; статус/причина отмены центром могут актуализироваться |
-| seats_count | int | Число мест, 1–3; лимит 3 — предположение/R-013 |
+| seats_count | int | Число мест, 1…`capacity_cap` (R-013) |
 | rental_count | int | Число прокатных комплектов, не больше числа мест |
 | seat_gear | array enum (`own`, `rental`) | Выбор экипировки по каждому месту |
 | price_total | money RUB | Итоговая цена из API |
@@ -142,7 +142,7 @@ erDiagram
 
 ## Правила
 
-- `seats_count <= min(slot.free_seats, slot.track_config.capacity_cap, 3)`, где лимит 3 — предположение/R-013.
+- `seats_count <= min(slot.free_seats, slot.track_config.capacity_cap)` (R-013).
 - `rental_count <= slot.free_rental_gear`.
 - `price_total` рассчитывает сервер.
 - До создания брони клиент может показывать локальный preview: `slot.price * seats_count + slot.rental_price * rental_count`; после создания источником истины является `Booking.price_total`.

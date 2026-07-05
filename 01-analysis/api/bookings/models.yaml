@@ -19,18 +19,18 @@ components:
         seats_count:
           type: integer
           minimum: 1
-          maximum: 3
-          description: Number of seats in the booking. Maximum 3 is an MVP assumption (R-013).
+          maximum: 14
+          description: Number of seats in the booking. Upper bound follows experienced track capacity_cap (R-013).
         rental_count:
           type: integer
           minimum: 0
-          maximum: 3
-          description: Number of rented gear sets. Must equal count of `rental` in seat_gear. Maximum 3 follows the booking seat limit assumption (R-013).
+          maximum: 14
+          description: Number of rented gear sets. Must equal count of `rental` in seat_gear.
         seat_gear:
           type: array
           minItems: 1
-          maxItems: 3
-          description: Gear choice for each booked seat. Array length is the source for seats_count; maxItems 3 is an MVP assumption (R-013).
+          maxItems: 14
+          description: Gear choice for each booked seat. Array length is the source for seats_count (R-013).
           items:
             $ref: '#/components/schemas/GearChoice'
         price_total:
@@ -96,7 +96,7 @@ components:
         seat_gear:
           type: array
           minItems: 1
-          maxItems: 3
-          description: Gear choice for each booked seat. The server derives seats_count from array length; maxItems 3 is an MVP assumption (R-013).
+          maxItems: 14
+          description: Gear choice for each booked seat. The server derives seats_count from array length (R-013).
           items:
             $ref: '#/components/schemas/GearChoice'

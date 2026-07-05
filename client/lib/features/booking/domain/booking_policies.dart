@@ -1,21 +1,14 @@
 import '../../slots/domain/slot_models.dart';
 import 'booking_models.dart';
 
-/// Booking seat limit — MVP assumption R-013 (see api/bookings/models.yaml).
-const int maxSeatsPerBooking = 3;
-
 /// AvailabilityPolicy (LOGIC-002).
 class AvailabilityPolicy {
   const AvailabilityPolicy._();
 
-  /// `maxSeats = min(slot.freeSeats, slot.trackConfig.capacityCap, 3)`.
+  /// `maxSeats = min(slot.freeSeats, slot.trackConfig.capacityCap)`.
   static int maxSeats(Slot slot) {
     final cap = slot.trackConfig.capacityCap;
-    var result = slot.freeSeats < cap ? slot.freeSeats : cap;
-    if (result > maxSeatsPerBooking) {
-      result = maxSeatsPerBooking;
-    }
-    return result;
+    return slot.freeSeats < cap ? slot.freeSeats : cap;
   }
 
   /// seat_gear length must be 1..maxSeats and rental count must fit
@@ -28,6 +21,18 @@ class AvailabilityPolicy {
     final rentalCount =
         seatGear.where((g) => g == GearChoice.rental).length;
     return rentalCount <= slot.freeRentalGear;
+  }
+
+  /// Builds API `seat_gear` from compact own/rental counters.
+  static List<GearChoice> seatGearFromCounts({
+    required int totalSeats,
+    required int rentalCount,
+  }) {
+    final ownCount = totalSeats - rentalCount;
+    return [
+      ...List.filled(ownCount, GearChoice.own),
+      ...List.filled(rentalCount, GearChoice.rental),
+    ];
   }
 }
 

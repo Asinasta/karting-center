@@ -9,7 +9,6 @@ from ..contracts.common import Money
 from ..errors import ApiError
 from .models import SlotRecord
 
-MAX_SEATS_PER_BOOKING = 3
 CANCEL_THRESHOLD = timedelta(hours=2)
 
 
@@ -21,8 +20,8 @@ def seats_and_rental(seat_gear: list[GearChoice]) -> tuple[int, int]:
 
 
 def max_seats(free_seats: int, capacity_cap: int) -> int:
-    """AvailabilityPolicy: min(free_seats, capacity_cap, 3)."""
-    return min(free_seats, capacity_cap, MAX_SEATS_PER_BOOKING)
+    """AvailabilityPolicy: min(free_seats, capacity_cap)."""
+    return min(free_seats, capacity_cap)
 
 
 def ensure_bookable(
@@ -39,14 +38,14 @@ def ensure_bookable(
     if now >= slot.start_at:
         raise ApiError("slot_started", "Slot has already started")
 
-    if not (1 <= seats_count <= MAX_SEATS_PER_BOOKING):
+    allowed_seats = min(slot.free_seats, capacity_cap)
+    if seats_count < 1:
         raise ApiError(
             "validation_error",
-            "seats_count must be between 1 and 3",
+            "seats_count must be at least 1",
             status_code=422,
         )
 
-    allowed_seats = min(slot.free_seats, capacity_cap)
     if seats_count > allowed_seats or rental_count > slot.free_rental_gear:
         raise ApiError(
             "slot_full",

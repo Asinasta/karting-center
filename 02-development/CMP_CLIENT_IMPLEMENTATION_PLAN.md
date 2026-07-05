@@ -187,7 +187,7 @@ class Money {
 
 Правила:
 
-- `maxSeats = min(slot.freeSeats, slot.trackConfig.capacityCap, 3)`.
+- `maxSeats = min(slot.freeSeats, slot.trackConfig.capacityCap)`.
 - `seatGear.length` должен быть от 1 до `maxSeats`.
 - `rentalCount <= slot.freeRentalGear`.
 - Своя экипировка занимает место, но не расходует прокатную экипировку.
@@ -516,7 +516,7 @@ Auth gate:
 
 - Если пользователь в `GuestSession`, сначала выполнить auth gate и вернуть к форме.
 - Показать сводку заезда.
-- Дать выбрать 1-3 места.
+- Дать выбрать от 1 до всех свободных мест.
 - Дать выбрать свою/прокатную экипировку на каждое место.
 - Валидировать доступность через `AvailabilityPolicy`.
 - Показать предварительный расчёт цены.

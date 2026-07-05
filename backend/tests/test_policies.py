@@ -40,8 +40,9 @@ def test_seats_and_rental():
 
 
 def test_max_seats_min_rule():
-    assert max_seats(free_seats=10, capacity_cap=14) == 3
+    assert max_seats(free_seats=10, capacity_cap=14) == 10
     assert max_seats(free_seats=2, capacity_cap=14) == 2
+    assert max_seats(free_seats=10, capacity_cap=8) == 8
     assert max_seats(free_seats=10, capacity_cap=1) == 1
 
 

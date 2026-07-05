@@ -63,11 +63,23 @@ Booking _booking({
 
 void main() {
   group('AvailabilityPolicy', () {
-    test('maxSeats = min(freeSeats, capacityCap, 3)', () {
-      expect(AvailabilityPolicy.maxSeats(_slot(freeSeats: 6, capacityCap: 8)), 3);
+    test('maxSeats = min(freeSeats, capacityCap)', () {
+      expect(AvailabilityPolicy.maxSeats(_slot(freeSeats: 6, capacityCap: 8)), 6);
       expect(AvailabilityPolicy.maxSeats(_slot(freeSeats: 2, capacityCap: 8)), 2);
       expect(AvailabilityPolicy.maxSeats(_slot(freeSeats: 6, capacityCap: 1)), 1);
       expect(AvailabilityPolicy.maxSeats(_slot(freeSeats: 0)), 0);
+    });
+
+    test('seatGearFromCounts builds own then rental entries', () {
+      expect(
+        AvailabilityPolicy.seatGearFromCounts(totalSeats: 4, rentalCount: 2),
+        const [
+          GearChoice.own,
+          GearChoice.own,
+          GearChoice.rental,
+          GearChoice.rental,
+        ],
+      );
     });
 
     test('selection must be 1..maxSeats seats', () {

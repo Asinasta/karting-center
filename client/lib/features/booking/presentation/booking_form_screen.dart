@@ -34,8 +34,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   LoadState<Slot> _state = const Loading();
   ActionStatus _action = ActionStatus.idle;
 
-  /// Gear choice per selected seat (length = seats count).
-  List<GearChoice> _seatGear = [GearChoice.own];
+  int _totalSeats = 1;
+  int _rentalCount = 0;
 
   /// Same key is reused while the payload is unchanged, so an ambiguous
   /// network failure can be retried without double booking (SCR-004 rule).
@@ -48,6 +48,11 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
       _load();
     });
   }
+
+  List<GearChoice> get _seatGear => AvailabilityPolicy.seatGearFromCounts(
+        totalSeats: _totalSeats,
+        rentalCount: _rentalCount,
+      );
 
   Future<void> _load() async {
     setState(() => _state = const Loading());
@@ -68,27 +73,20 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   void _clampSelection(Slot slot) {
     final maxSeats = AvailabilityPolicy.maxSeats(slot);
     if (maxSeats <= 0) {
-      _seatGear = [];
+      _totalSeats = 0;
+      _rentalCount = 0;
       return;
     }
-    if (_seatGear.isEmpty) {
-      _seatGear = [GearChoice.own];
+    if (_totalSeats < 1) {
+      _totalSeats = 1;
     }
-    if (_seatGear.length > maxSeats) {
-      _seatGear = _seatGear.sublist(0, maxSeats);
+    if (_totalSeats > maxSeats) {
+      _totalSeats = maxSeats;
     }
-    // Rental units above the free amount fall back to own gear.
-    var rentalBudget = slot.freeRentalGear;
-    _seatGear = _seatGear.map((gear) {
-      if (gear == GearChoice.rental) {
-        if (rentalBudget > 0) {
-          rentalBudget--;
-          return GearChoice.rental;
-        }
-        return GearChoice.own;
-      }
-      return gear;
-    }).toList();
+    final maxRental = min(_totalSeats, slot.freeRentalGear);
+    if (_rentalCount > maxRental) {
+      _rentalCount = maxRental;
+    }
   }
 
   void _resetIdempotencyKey() => _idempotencyKey = null;
@@ -103,32 +101,25 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 
-  void _setSeats(Slot slot, int seats) {
+  void _setTotalSeats(Slot slot, int seats) {
     setState(() {
-      if (seats < _seatGear.length) {
-        _seatGear = _seatGear.sublist(0, seats);
-      } else {
-        _seatGear = [
-          ..._seatGear,
-          ...List.filled(seats - _seatGear.length, GearChoice.own),
-        ];
-      }
+      _totalSeats = seats;
       _clampSelection(slot);
       _resetIdempotencyKey();
     });
   }
 
-  void _setGear(Slot slot, int seatIndex, GearChoice gear) {
+  void _setRentalCount(Slot slot, int rental) {
     setState(() {
-      _seatGear = [..._seatGear]..[seatIndex] = gear;
+      _rentalCount = rental;
+      _clampSelection(slot);
       _resetIdempotencyKey();
     });
   }
 
-  int get _rentalCount => _seatGear.where((g) => g == GearChoice.rental).length;
-
   Future<void> _submit(Slot slot) async {
-    if (!AvailabilityPolicy.isSelectionValid(slot, _seatGear)) {
+    final seatGear = _seatGear;
+    if (!AvailabilityPolicy.isSelectionValid(slot, seatGear)) {
       showAppSnack(context, 'Выбор мест недоступен, обновите данные заезда');
       return;
     }
@@ -138,7 +129,7 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     try {
       final booking = await deps.bookingRepository.createBooking(
         slotId: slot.id,
-        seatGear: _seatGear,
+        seatGear: seatGear,
         idempotencyKey: _ensureIdempotencyKey(),
       );
       if (!mounted) return;
@@ -219,6 +210,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final maxSeats = AvailabilityPolicy.maxSeats(slot);
     final bookable = slot.isAvailable && maxSeats > 0;
     final submitting = _action == ActionStatus.submitting;
+    final maxRental = min(_totalSeats, slot.freeRentalGear);
+    final ownCount = _totalSeats - _rentalCount;
 
     final preview = BookingPricePreviewCalculator.preview(
       price: slot.price,
@@ -229,7 +222,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     return ListView(
       padding: const EdgeInsets.all(ApexSpacing.md),
       children: [
-        // Slot summary.
         Card(
           child: Padding(
             padding: const EdgeInsets.all(ApexSpacing.md),
@@ -274,44 +266,91 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: ApexSpacing.sm),
-          SegmentedButton<int>(
-            segments: [
-              for (var seats = 1; seats <= maxSeats; seats++)
-                ButtonSegment(value: seats, label: Text('$seats')),
-            ],
-            selected: {_seatGear.length},
-            onSelectionChanged: submitting
-                ? null
-                : (selection) => _setSeats(slot, selection.first),
+          _CounterRow(
+            label: 'Мест',
+            value: _totalSeats,
+            min: 1,
+            max: maxSeats,
+            enabled: !submitting,
+            onChanged: (value) => _setTotalSeats(slot, value),
           ),
           const SizedBox(height: ApexSpacing.xs),
-          Text(
-            'Максимум $maxSeats на одну бронь',
-            style: textTheme.bodySmall,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: submitting || _totalSeats == maxSeats
+                  ? null
+                  : () => _setTotalSeats(slot, maxSeats),
+              child: Text('Все свободные ($maxSeats)'),
+            ),
           ),
           const SizedBox(height: ApexSpacing.lg),
           Text(
             'Экипировка',
             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
+          const SizedBox(height: ApexSpacing.xs),
+          Text(
+            'Своя: $ownCount · прокат: $_rentalCount',
+            style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+          ),
           const SizedBox(height: ApexSpacing.sm),
-          for (var i = 0; i < _seatGear.length; i++) ...[
-            _SeatGearSelector(
-              seatIndex: i,
-              value: _seatGear[i],
-              rentalPrice: slot.rentalPrice,
-              // A rental option is enabled while free gear remains for it.
-              rentalEnabled: _seatGear[i] == GearChoice.rental ||
-                  _rentalCount < slot.freeRentalGear,
-              enabled: !submitting,
-              onChanged: (gear) => _setGear(slot, i, gear),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: ApexSpacing.md,
+                vertical: ApexSpacing.sm,
+              ),
+              child: Column(
+                children: [
+                  _CounterRow(
+                    label: 'Своя экипировка',
+                    value: ownCount,
+                    min: 0,
+                    max: _totalSeats,
+                    enabled: !submitting,
+                    onChanged: (own) =>
+                        _setRentalCount(slot, _totalSeats - own),
+                  ),
+                  const Divider(height: ApexSpacing.lg),
+                  _CounterRow(
+                    label: 'Прокат (+${slot.rentalPrice.formatted})',
+                    value: _rentalCount,
+                    min: 0,
+                    max: maxRental,
+                    enabled: !submitting && slot.freeRentalGear > 0,
+                    onChanged: (rental) => _setRentalCount(slot, rental),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: ApexSpacing.sm),
-          ],
+          ),
+          const SizedBox(height: ApexSpacing.sm),
+          Wrap(
+            spacing: ApexSpacing.sm,
+            children: [
+              ActionChip(
+                label: const Text('Вся своя'),
+                onPressed: submitting
+                    ? null
+                    : () => _setRentalCount(slot, 0),
+              ),
+              if (slot.freeRentalGear > 0)
+                ActionChip(
+                  label: Text('Макс. прокат ($maxRental)'),
+                  onPressed: submitting
+                      ? null
+                      : () => _setRentalCount(slot, maxRental),
+                ),
+            ],
+          ),
           if (slot.freeRentalGear == 0)
-            Text(
-              'Прокатной экипировки на этот заезд не осталось.',
-              style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+            Padding(
+              padding: const EdgeInsets.only(top: ApexSpacing.xs),
+              child: Text(
+                'Прокатной экипировки на этот заезд не осталось.',
+                style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+              ),
             ),
           const SizedBox(height: ApexSpacing.lg),
           Card(
@@ -320,9 +359,9 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
               child: Column(
                 children: [
                   _PriceLine(
-                    label: 'Места · ${_seatGear.length} × ${slot.price.formatted}',
+                    label: 'Места · $_totalSeats × ${slot.price.formatted}',
                     value: Money(
-                      amount: slot.price.amount * _seatGear.length,
+                      amount: slot.price.amount * _totalSeats,
                       currency: slot.price.currency,
                     ).formatted,
                   ),
@@ -362,60 +401,44 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
   }
 }
 
-class _SeatGearSelector extends StatelessWidget {
-  const _SeatGearSelector({
-    required this.seatIndex,
+class _CounterRow extends StatelessWidget {
+  const _CounterRow({
+    required this.label,
     required this.value,
-    required this.rentalPrice,
-    required this.rentalEnabled,
+    required this.min,
+    required this.max,
     required this.enabled,
     required this.onChanged,
   });
 
-  final int seatIndex;
-  final GearChoice value;
-  final Money rentalPrice;
-  final bool rentalEnabled;
+  final String label;
+  final int value;
+  final int min;
+  final int max;
   final bool enabled;
-  final ValueChanged<GearChoice> onChanged;
+  final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(ApexSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Место ${seatIndex + 1}',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: ApexSpacing.sm),
-            SegmentedButton<GearChoice>(
-              segments: [
-                const ButtonSegment(
-                  value: GearChoice.own,
-                  label: Text('Своя'),
-                  icon: Icon(Icons.backpack_outlined),
-                ),
-                ButtonSegment(
-                  value: GearChoice.rental,
-                  label: Text('Прокат (+${rentalPrice.formatted})'),
-                  icon: const Icon(Icons.checkroom_outlined),
-                  enabled: rentalEnabled,
-                ),
-              ],
-              selected: {value},
-              onSelectionChanged:
-                  enabled ? (selection) => onChanged(selection.first) : null,
-            ),
-          ],
+    final canDecrease = enabled && value > min;
+    final canIncrease = enabled && value < max;
+
+    return Row(
+      children: [
+        Expanded(child: Text(label)),
+        IconButton(
+          onPressed: canDecrease ? () => onChanged(value - 1) : null,
+          icon: const Icon(Icons.remove_circle_outline),
         ),
-      ),
+        Text(
+          '$value',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        IconButton(
+          onPressed: canIncrease ? () => onChanged(value + 1) : null,
+          icon: const Icon(Icons.add_circle_outline),
+        ),
+      ],
     );
   }
 }

@@ -26,7 +26,7 @@
 | TC-08 | Ранняя отмена (≥2ч) | `cancelBooking` до старта | status `cancelled`, места возвращены | `test_cancellation.py` |
 | TC-09 | Поздняя отмена (<2ч) | `cancelBooking` | status `late_cancel` | `test_cancellation.py` |
 | TC-10 | Контракт OpenAPI | Все operationId и схемы | 0 расхождений | `manage.py contract-check` |
-| TC-11 | maxSeats policy | `min(free, cap, 3)` | Корректный лимит | `client/test/domain/booking_policies_test.dart` |
+| TC-11 | maxSeats policy | `min(free, cap)` | Корректный лимит | `client/test/domain/booking_policies_test.dart` |
 | TC-12 | Цена preview | seats × price + rental × count | Формула LOGIC-003 | `booking_policies_test.dart` |
 | TC-13 | 401 → refresh → retry | Истёкший access token | Один refresh, повтор успешен | `client/test/data/repositories_test.dart` |
 | TC-14 | Фильтры в query | `SlotFilter.toQuery()` | `track_config_type`, `marshal_id` | `repositories_test.dart` |
