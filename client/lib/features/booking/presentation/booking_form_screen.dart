@@ -117,6 +117,15 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     });
   }
 
+  /// Own gear changes total seats while keeping rental count fixed.
+  void _setOwnCount(Slot slot, int own) {
+    setState(() {
+      _totalSeats = own + _rentalCount;
+      _clampSelection(slot);
+      _resetIdempotencyKey();
+    });
+  }
+
   Future<void> _submit(Slot slot) async {
     final seatGear = _seatGear;
     if (!AvailabilityPolicy.isSelectionValid(slot, seatGear)) {
@@ -211,8 +220,8 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final bookable = slot.isAvailable && maxSeats > 0;
     final submitting = _action == ActionStatus.submitting;
     final maxRental = min(_totalSeats, slot.freeRentalGear);
-    final minOwn = _totalSeats - maxRental;
     final ownCount = _totalSeats - _rentalCount;
+    final maxOwn = maxSeats - _rentalCount;
 
     final preview = BookingPricePreviewCalculator.preview(
       price: slot.price,
@@ -307,11 +316,10 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                   _CounterRow(
                     label: 'Своя экипировка',
                     value: ownCount,
-                    min: minOwn,
-                    max: _totalSeats,
+                    min: 0,
+                    max: maxOwn,
                     enabled: !submitting,
-                    onChanged: (own) =>
-                        _setRentalCount(slot, _totalSeats - own),
+                    onChanged: (own) => _setOwnCount(slot, own),
                   ),
                   const Divider(height: ApexSpacing.lg),
                   _CounterRow(
@@ -345,14 +353,6 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                 ),
             ],
           ),
-          if (minOwn > 0)
-            Padding(
-              padding: const EdgeInsets.only(top: ApexSpacing.xs),
-              child: Text(
-                'При $maxRental прокатных комплектах минимум своих — $minOwn.',
-                style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
-              ),
-            ),
           if (slot.freeRentalGear == 0)
             Padding(
               padding: const EdgeInsets.only(top: ApexSpacing.xs),
