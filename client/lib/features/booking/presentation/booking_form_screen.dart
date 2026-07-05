@@ -271,24 +271,39 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
             'Количество мест',
             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: ApexSpacing.sm),
-          _CounterRow(
-            label: 'Мест',
-            value: _totalSeats,
-            min: 1,
-            max: maxSeats,
-            enabled: !submitting,
-            onChanged: (value) => _setTotalSeats(slot, value),
-          ),
           const SizedBox(height: ApexSpacing.xs),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: submitting || _totalSeats == maxSeats
-                  ? null
-                  : () => _setTotalSeats(slot, maxSeats),
-              child: Text('Все свободные ($maxSeats)'),
+          Text(
+            'Свободно: $maxSeats',
+            style: textTheme.bodySmall?.copyWith(color: ApexColors.muted),
+          ),
+          const SizedBox(height: ApexSpacing.sm),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: ApexSpacing.md,
+                vertical: ApexSpacing.sm,
+              ),
+              child: _CounterRow(
+                label: 'Мест',
+                value: _totalSeats,
+                min: 1,
+                max: maxSeats,
+                enabled: !submitting,
+                onChanged: (value) => _setTotalSeats(slot, value),
+              ),
             ),
+          ),
+          const SizedBox(height: ApexSpacing.sm),
+          Wrap(
+            spacing: ApexSpacing.sm,
+            children: [
+              ActionChip(
+                label: Text('Все свободные ($maxSeats)'),
+                onPressed: submitting || _totalSeats == maxSeats
+                    ? null
+                    : () => _setTotalSeats(slot, maxSeats),
+              ),
+            ],
           ),
           const SizedBox(height: ApexSpacing.lg),
           Text(
