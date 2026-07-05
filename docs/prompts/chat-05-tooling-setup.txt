@@ -1,0 +1,47 @@
+﻿<timestamp>Saturday, Jul 4, 2026, 5:41 PM (UTC+3)</timestamp>
+<user_query>
+почему ты не можешь пользоваться командной строкой
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:43 PM (UTC+3)</timestamp>
+<user_query>
+ты можешь установить mcp, которую я скажу
+</user_query>
+[Image]
+<image_files>
+The following images were provided by the user and saved to the workspace for future use:
+1. C:\Users\Asinasta\.cursor\projects\c-Users-Asinasta-Downloads-karting-center/assets/c__Users_Asinasta_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_image-293cb34d-6669-4b6e-bf3b-12e0226cfa88.png
+
+These images can be copied for use in other locations.
+</image_files>
+<timestamp>Saturday, Jul 4, 2026, 5:46 PM (UTC+3)</timestamp>
+<user_query>
+что делают данные MCP:
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:47 PM (UTC+3)</timestamp>
+<user_query>
+что из этого уже установленно?
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:48 PM (UTC+3)</timestamp>
+<user_query>
+я про Cursor, а не скриншот
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:49 PM (UTC+3)</timestamp>
+<user_query>
+Show me how the Context7 plugin works
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:50 PM (UTC+3)</timestamp>
+<user_query>
+установи MCP git hub
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:52 PM (UTC+3)</timestamp>
+<user_query>
+как узнать git token
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 5:57 PM (UTC+3)</timestamp>
+<user_query>
+я вставила токен, но ничего не получилось\
+</user_query>
+<timestamp>Saturday, Jul 4, 2026, 6:00 PM (UTC+3)</timestamp>
+<user_query>
+я вставила токен и перезапустила Cursor, ничего не поменялось
+</user_query>

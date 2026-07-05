@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+pydantic
+pydantic-settings
+PyJWT
+PyYAML
+
+# dev / test
+pytest
+httpx
+ruff
