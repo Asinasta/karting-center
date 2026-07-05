@@ -8,7 +8,6 @@ import '../core/storage/token_storage.dart';
 import '../features/auth/data/auth_repository.dart';
 import '../features/booking/data/booking_repository.dart';
 import '../features/booking/domain/booking_models.dart';
-import '../features/notifications/data/notification_repository.dart';
 import '../features/notifications/push_service.dart';
 import '../features/profile/data/profile_repository.dart';
 import '../features/profile/domain/profile_models.dart';
@@ -28,7 +27,6 @@ class AppDependencies {
     required this.marshalRepository,
     required this.bookingRepository,
     required this.profileRepository,
-    required this.notificationRepository,
     required this.pushService,
     required this.sessionController,
     required this.slotsCache,
@@ -64,7 +62,6 @@ class AppDependencies {
       marshalRepository: ApiMarshalRepository(apiClient),
       bookingRepository: ApiBookingRepository(apiClient),
       profileRepository: profileRepository,
-      notificationRepository: ApiNotificationRepository(apiClient),
       pushService: LocalFlagPushService(profileRepository),
       sessionController: sessionController,
       slotsCache: LocalCache<List<Slot>>(),
@@ -81,7 +78,6 @@ class AppDependencies {
   final MarshalRepository marshalRepository;
   final BookingRepository bookingRepository;
   final ProfileRepository profileRepository;
-  final NotificationRepository notificationRepository;
   final PushService pushService;
   final SessionController sessionController;
 
