@@ -64,6 +64,15 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
         _state = Content(slot);
         _clampSelection(slot);
       });
+      final deps = AppScope.of(context);
+      if (deps.profileCache.value == null && deps.sessionController.isAuthenticated) {
+        try {
+          final profile = await deps.profileRepository.getProfile();
+          if (mounted) deps.profileCache.store(profile);
+        } on Object {
+          // Loyalty preview is optional.
+        }
+      }
     } on Object catch (error) {
       if (!mounted) return;
       setState(() => _state = Failure(toAppFailure(error)));
@@ -218,11 +227,18 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
     final maxRental = min(_totalSeats, slot.freeRentalGear);
     final ownCount = _totalSeats - _rentalCount;
     final minOwn = _totalSeats - maxRental;
-
+    final profile = AppScope.of(context).profileCache.value;
+    final loyaltyDiscount = profile?.loyaltyDiscountPercent ?? 0;
+    final subtotal = BookingPricePreviewCalculator.preview(
+      price: slot.price,
+      rentalPrice: slot.rentalPrice,
+      seatGear: _seatGear,
+    );
     final preview = BookingPricePreviewCalculator.preview(
       price: slot.price,
       rentalPrice: slot.rentalPrice,
       seatGear: _seatGear,
+      loyaltyDiscountPercent: loyaltyDiscount,
     );
 
     return ListView(
@@ -393,6 +409,13 @@ class _BookingFormScreenState extends State<BookingFormScreen> {
                         amount: slot.rentalPrice.amount * _rentalCount,
                         currency: slot.rentalPrice.currency,
                       ).formatted,
+                    ),
+                  if (loyaltyDiscount > 0 && preview.amount < subtotal.amount)
+                    _PriceLine(
+                      label:
+                          'Скидка ${profile!.loyaltyTier!.label} · $loyaltyDiscount%',
+                      value:
+                          '-${Money(amount: subtotal.amount - preview.amount, currency: subtotal.currency).formatted}',
                     ),
                   const Divider(),
                   _PriceLine(

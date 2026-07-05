@@ -10,6 +10,8 @@ import '../../../core/ui/load_state.dart';
 import '../../../core/ui/screen_states.dart';
 import '../domain/booking_models.dart';
 import '../domain/booking_policies.dart';
+import '../../notifications/domain/notification_models.dart';
+import '../../notifications/presentation/rating_reminder_banner.dart';
 
 const _pageSize = 20;
 
@@ -25,6 +27,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
   LoadState<List<Booking>> _state = const Loading();
   int _total = 0;
   bool _loadingMore = false;
+  AppNotification? _ratingReminder;
 
   @override
   void initState() {
@@ -52,6 +55,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
         _total = page.pagination?.total ?? page.items.length;
         _state = page.items.isEmpty ? const Empty() : Content(page.items);
       });
+      await _loadRatingReminder();
     } on Object catch (error) {
       if (!mounted) return;
       final failure = toAppFailure(error);
@@ -63,6 +67,24 @@ class _BookingListScreenState extends State<BookingListScreen> {
           _state = Failure(failure);
         }
       });
+    }
+  }
+
+  Future<void> _loadRatingReminder() async {
+    try {
+      final notifications =
+          await AppScope.of(context).notificationRepository.listNotifications();
+      if (!mounted) return;
+      AppNotification? reminder;
+      for (final item in notifications.items) {
+        if (item.isRateMarshal) {
+          reminder = item;
+          break;
+        }
+      }
+      setState(() => _ratingReminder = reminder);
+    } on Object {
+      // Notifications must not break the bookings list.
     }
   }
 
@@ -164,6 +186,13 @@ class _BookingListScreenState extends State<BookingListScreen> {
 
     final children = <Widget>[
       if (refreshing) const LinearProgressIndicator(),
+      if (_ratingReminder != null) ...[
+        RatingReminderBanner(
+          notification: _ratingReminder!,
+          onDismiss: () => setState(() => _ratingReminder = null),
+        ),
+        const SizedBox(height: ApexSpacing.md),
+      ],
       ..._section('Предстоящие', upcoming),
       ..._section('Прошедшие', past),
       ..._section('Отменённые', cancelled),

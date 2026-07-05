@@ -225,6 +225,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return ListView(
       padding: const EdgeInsets.all(ApexSpacing.md),
       children: [
+        if (profile.hasLoyalty) ...[
+          Card(
+            color: ApexColors.grassGreen.withOpacity(0.08),
+            child: Padding(
+              padding: const EdgeInsets.all(ApexSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.workspace_premium_outlined),
+                      const SizedBox(width: ApexSpacing.sm),
+                      Text(
+                        profile.loyaltyTier!.label,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: ApexSpacing.xs),
+                  Text('Завершённых заездов: ${profile.completedRidesCount}'),
+                  if (profile.loyaltyDiscountPercent != null)
+                    Text(
+                      'Скидка ${profile.loyaltyDiscountPercent}% на каждую новую запись',
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: ApexSpacing.md),
+        ],
         Card(
           child: Column(
             children: [
@@ -253,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const ListTile(
                 leading: Icon(Icons.notifications_outlined),
                 title: Text('Уведомления'),
-                subtitle: Text('Push об отменах и напоминания'),
+                subtitle: Text('Напоминания об отменах, заездах и оценке маршала'),
               ),
               const Divider(height: 1),
               ListTile(

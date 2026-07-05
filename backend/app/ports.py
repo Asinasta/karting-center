@@ -20,6 +20,7 @@ from uuid import UUID
 
 from .contracts.bookings import Booking, BookingList, CreateBookingRequest, CreateMarshalRatingRequest
 from .contracts.marshals import Marshal
+from .contracts.notifications import NotificationList
 from .contracts.profile import Profile
 from .contracts.slots import Slot
 from .domain.models import ClientRecord
@@ -134,5 +135,10 @@ class PushTokenPort(ABC):
     ) -> None: ...
 
 
-class Backend(AuthPort, SlotPort, MarshalPort, BookingPort, ProfilePort, PushTokenPort, ABC):
+class NotificationPort(ABC):
+    @abstractmethod
+    def list_notifications(self, client_id: UUID, now: datetime) -> NotificationList: ...
+
+
+class Backend(AuthPort, SlotPort, MarshalPort, BookingPort, ProfilePort, PushTokenPort, NotificationPort, ABC):
     """A single object that implements every port (fixtures / existing)."""

@@ -18,6 +18,19 @@ components:
         phone:
           type: string
           pattern: '^\\+[1-9]\\d{7,14}$'
+        completed_rides_count:
+          type: integer
+          minimum: 0
+          default: 0
+        loyalty_tier:
+          type: string
+          enum: [regular, vip]
+          description: Omitted when the client has no loyalty tier yet.
+        loyalty_discount_percent:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Active booking discount percent for the current tier.
     UpdateProfileRequest:
       type: object
       properties:

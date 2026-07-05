@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Apex Notifications Models
+  version: 0.1.0
+components:
+  schemas:
+    AppNotification:
+      type: object
+      required: [id, type, title, body, booking_id, created_at]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [rate_marshal]
+        title:
+          type: string
+        body:
+          type: string
+        booking_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+    NotificationList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppNotification'

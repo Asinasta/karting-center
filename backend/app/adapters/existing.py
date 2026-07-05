@@ -21,6 +21,7 @@ from ..contracts.marshals import Marshal
 from ..contracts.profile import Profile
 from ..contracts.slots import Slot
 from ..domain.models import ClientRecord
+from ..contracts.notifications import NotificationList
 from ..ports import Backend, SlotFilters
 
 
@@ -118,3 +119,6 @@ class ExistingBackendAdapter(_NotImplementedBackend):
         self, client_id: UUID, token: str, platform: str, device_id: str | None
     ) -> None:
         self._todo("register_push_token")
+
+    def list_notifications(self, client_id: UUID, now: datetime) -> NotificationList:
+        self._todo("list_notifications")

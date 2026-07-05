@@ -46,13 +46,21 @@ class BookingPricePreviewCalculator {
     required Money price,
     required Money rentalPrice,
     required List<GearChoice> seatGear,
+    int loyaltyDiscountPercent = 0,
   }) {
     final seats = seatGear.length;
     final rentalCount =
         seatGear.where((g) => g == GearChoice.rental).length;
-    return Money(
+    final subtotal = Money(
       amount: price.amount * seats + rentalPrice.amount * rentalCount,
       currency: price.currency,
+    );
+    if (loyaltyDiscountPercent <= 0) {
+      return subtotal;
+    }
+    return Money(
+      amount: subtotal.amount * (100 - loyaltyDiscountPercent) ~/ 100,
+      currency: subtotal.currency,
     );
   }
 }

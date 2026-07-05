@@ -17,7 +17,7 @@ from .domain.clock import Clock, SystemClock
 from .errors import ApiError
 from .logging_config import configure_logging, log
 from .ports import Backend
-from .routers import auth, bookings, marshals, profile, slots
+from .routers import auth, bookings, marshals, notifications, profile, slots
 from .security import TokenService
 
 logger = logging.getLogger("apex.api")
@@ -60,7 +60,7 @@ def create_app(
     _register_middleware(app)
     _register_error_handlers(app)
 
-    for module in (auth, slots, marshals, bookings, profile):
+    for module in (auth, slots, marshals, bookings, profile, notifications):
         app.include_router(module.router)
 
     @app.get("/healthz", include_in_schema=False)

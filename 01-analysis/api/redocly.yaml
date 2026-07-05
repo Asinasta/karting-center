@@ -10,6 +10,8 @@ apis:
     root: profile/api.yaml
   marshals:
     root: marshals/api.yaml
+  notifications:
+    root: notifications/api.yaml
 
 rules:
   no-unresolved-refs: error

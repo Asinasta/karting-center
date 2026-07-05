@@ -27,6 +27,7 @@ from ..domain.models import (
     SlotRecord,
     TrackConfigRecord,
 )
+from ..domain.loyalty import apply_loyalty_discount, loyalty_from_completed_rides
 from ..domain.policies import (
     can_rate_marshal,
     cancellation_kind,
@@ -510,7 +511,59 @@ class FixturesAdapter(Backend):
         )
 
     def _profile_contract(self, c: ClientRecord) -> Profile:
-        return Profile(id=c.id, name=c.name, phone=c.phone)
+        completed = self._completed_rides_count(c.id)
+        tier, discount = loyalty_from_completed_rides(completed)
+        return Profile(
+            id=c.id,
+            name=c.name,
+            phone=c.phone,
+            completed_rides_count=completed,
+            loyalty_tier=tier,
+            loyalty_discount_percent=discount,
+        )
+
+    def _completed_rides_count(self, client_id: UUID) -> int:
+        return sum(
+            1
+            for booking in self._bookings.values()
+            if booking.client_id == client_id and booking.status == "completed"
+        )
+
+    def _ride_end_at(self, booking: BookingRecord) -> datetime:
+        duration_min = booking.slot_snapshot.track_config.duration_min or 15
+        return booking.slot_snapshot.start_at + timedelta(minutes=duration_min)
+
+    def list_notifications(self, client_id: UUID, now: datetime) -> NotificationList:
+        from ..contracts.notifications import AppNotification, NotificationList
+
+        items: list[AppNotification] = []
+        for booking in self._bookings.values():
+            if booking.client_id != client_id:
+                continue
+            if booking.id in self._marshal_ratings:
+                continue
+            if not can_rate_marshal(
+                status=booking.status,
+                start_at=booking.slot_snapshot.start_at,
+                now=now,
+            ):
+                continue
+            ride_end = self._ride_end_at(booking)
+            if now < ride_end:
+                continue
+            marshal_name = booking.slot_snapshot.marshal.name
+            items.append(
+                AppNotification(
+                    id=f"rate_marshal:{booking.id}",
+                    type="rate_marshal",
+                    title="Оцените маршала",
+                    body=f"Как прошёл заезд с {marshal_name}?",
+                    booking_id=booking.id,
+                    created_at=ride_end.isoformat(),
+                )
+            )
+        items.sort(key=lambda item: item.created_at, reverse=True)
+        return NotificationList(items=items)
 
     # ------------------------------------------------------------- AuthPort
     def _gen_code(self) -> str:
@@ -668,6 +721,17 @@ class FixturesAdapter(Backend):
             slot.free_seats -= seats_count
             slot.free_rental_gear -= rental_count
 
+            total = price_total(
+                slot.price, slot.rental_price, seats_count, rental_count
+            )
+            _, discount_percent = loyalty_from_completed_rides(
+                self._completed_rides_count(client_id)
+            )
+            total = Money(
+                amount=apply_loyalty_discount(total.amount, discount_percent),
+                currency=total.currency,
+            )
+
             record = BookingRecord(
                 id=uuid4(),
                 client_id=client_id,
@@ -676,9 +740,7 @@ class FixturesAdapter(Backend):
                 seats_count=seats_count,
                 rental_count=rental_count,
                 seat_gear=list(req.seat_gear),
-                price_total=price_total(
-                    slot.price, slot.rental_price, seats_count, rental_count
-                ),
+                price_total=total,
                 status="active",
                 created_at=now,
             )
