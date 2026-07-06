@@ -238,6 +238,8 @@ class _MapPreview extends StatelessWidget {
     required this.onTap,
   });
 
+  static const _previewHeight = 112.0;
+
   final TrackConfigType trackType;
   final VoidCallback onTap;
 
@@ -246,44 +248,44 @@ class _MapPreview extends StatelessWidget {
     final assetPath = ApexAssets.trackMap(trackType);
 
     return Material(
-      color: ApexColors.outline.withOpacity(0.3),
+      color: ApexColors.asphalt,
       borderRadius: BorderRadius.circular(ApexRadius.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              assetPath,
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.28),
+        child: SizedBox(
+          height: _previewHeight,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                assetPath,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
-              child: const SizedBox(
-                height: 160,
-                width: double.infinity,
-              ),
-            ),
-            const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.map_outlined, size: 32, color: Colors.white),
-                SizedBox(height: ApexSpacing.sm),
-                Text(
-                  'Открыть карту трассы',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.35),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.map_outlined, size: 28, color: Colors.white),
+                  SizedBox(height: ApexSpacing.xs),
+                  Text(
+                    'Открыть карту трассы',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

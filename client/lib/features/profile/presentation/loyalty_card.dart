@@ -10,6 +10,8 @@ class LoyaltyCard extends StatelessWidget {
     super.key,
   });
 
+  static const _cardHeight = 128.0;
+
   final Profile profile;
 
   @override
@@ -19,71 +21,65 @@ class LoyaltyCard extends StatelessWidget {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(ApexRadius.md),
-      child: AspectRatio(
-        aspectRatio: 3 / 2,
+      child: SizedBox(
+        height: _cardHeight,
+        width: double.infinity,
         child: Stack(
           fit: StackFit.expand,
           children: [
             Image.asset(
               ApexAssets.loyaltyCard(tier),
               fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
             DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.72),
-                    Colors.black.withOpacity(0.35),
-                    Colors.transparent,
+                    Colors.black.withOpacity(0.15),
+                    Colors.black.withOpacity(0.55),
+                    Colors.black.withOpacity(0.82),
                   ],
+                  stops: const [0.0, 0.45, 1.0],
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(ApexSpacing.lg),
+              padding: const EdgeInsets.symmetric(
+                horizontal: ApexSpacing.md,
+                vertical: ApexSpacing.sm,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    'Апекс',
-                    style: textTheme.labelLarge?.copyWith(
-                      color: Colors.white70,
-                      letterSpacing: 1.2,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
                     tier.label,
-                    style: textTheme.titleLarge?.copyWith(
+                    style: textTheme.titleSmall?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(height: ApexSpacing.xs),
                   Text(
                     profile.name,
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: ApexSpacing.sm),
-                  Text(
-                    'Завершённых заездов: ${profile.completedRidesCount}',
                     style: textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    'Заездов: ${profile.completedRidesCount}'
+                    '${profile.loyaltyDiscountPercent != null ? ' · скидка ${profile.loyaltyDiscountPercent}%' : ''}',
+                    style: textTheme.bodySmall?.copyWith(
                       color: Colors.white70,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  if (profile.loyaltyDiscountPercent != null)
-                    Text(
-                      'Скидка ${profile.loyaltyDiscountPercent}% на каждую новую запись',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: ApexColors.trackRed.withOpacity(0.95),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
                 ],
               ),
             ),
