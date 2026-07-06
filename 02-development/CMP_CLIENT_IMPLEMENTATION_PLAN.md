@@ -6,7 +6,7 @@
 
 Список и карточки заездов доступны в гостевом режиме без авторизации. OTP-вход требуется при попытке создать бронь, открыть «Мои записи», открыть «Профиль» или выполнить другую персональную операцию.
 
-В MVP не реализуются интерфейс маршала, интерфейс владельца, админка, создание/редактирование расписания, онлайн-оплата, оценки маршалов, лояльность и авто-погода.
+В MVP не реализуются интерфейс маршала, интерфейс владельца, админка, создание/редактирование расписания, онлайн-оплата и авто-погода. Оценки маршалов, программа лояльности и push-инфраструктура входят в MVP по брифу заказчика.
 
 ## Предварительный стек
 
@@ -73,7 +73,10 @@
 | `BookingRepository` | `listBookings`       | `GET /bookings`                     |
 | `BookingRepository` | `getBooking`         | `GET /bookings/{bookingId}`         |
 | `BookingRepository` | `cancelBooking`      | `POST /bookings/{bookingId}/cancel` |
-| `ProfileRepository` | `getProfile`         | `GET /profile`                      |
+| `BookingRepository` | `rateMarshal`        | `POST /bookings/{bookingId}/marshal-rating` |
+| `BookingRepository` | `updateMarshalRating`| `PATCH /bookings/{bookingId}/marshal-rating` |
+| `BookingRepository` | `deleteMarshalRating`| `DELETE /bookings/{bookingId}/marshal-rating` |
+| `ProfileRepository` | `getProfile`         | `GET /profile` (loyalty fields)     |
 | `ProfileRepository` | `updateProfile`      | `PATCH /profile` только имя         |
 | `ProfileRepository` | `sendPhoneChangeOtp` | `POST /profile/phone-change/otp`    |
 | `ProfileRepository` | `verifyPhoneChange`  | `POST /profile/phone-change/verify` |
@@ -581,6 +584,7 @@ Auth gate:
 
 - Загрузить `GET /bookings/{bookingId}`.
 - Показать статус, snapshot данных заезда, маршала, экипировку, цену, точку сбора, карту.
+- Блок оценки маршала (LOGIC-010): POST/PATCH/DELETE `marshal-rating`.
 - Показывать кнопку отмены только для активной будущей брони.
 - Показать причину отмены центром для `cancelled_by_center`.
 
@@ -633,6 +637,7 @@ Auth gate:
 Сделать:
 
 - Загрузить `GET /profile`.
+- Показать карточку лояльности (LOGIC-009): tier, скидка, `completed_rides_count`.
 - Редактировать имя через `PATCH /profile`.
 - Реализовать смену телефона через `sendPhoneChangeOtp` и `verifyPhoneChange`.
 - Зарегистрировать push token через `POST /profile/push-token`.

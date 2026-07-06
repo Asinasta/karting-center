@@ -18,4 +18,4 @@ Flutter-клиент генерирует `Idempotency-Key` на попытку 
 
 ## Применяемые логики
 
-LOGIC-002, LOGIC-003, LOGIC-008.
+LOGIC-002, LOGIC-003, LOGIC-008, LOGIC-009.

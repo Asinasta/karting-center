@@ -2,6 +2,14 @@
 
 Оформление работы по брифу `01-analysis/0-customer-brief/customer-brief.md`.
 
+## См. также
+
+- [`../README.md`](../README.md) — обзор репозитория
+- [`../RUN_LOCAL.md`](../RUN_LOCAL.md) — локальный запуск
+- [`../backend/README.md`](../backend/README.md) — API backend
+- [`../client/README.md`](../client/README.md) — Flutter-клиент
+- [`implementation-report.md`](implementation-report.md) — отчёт о реализации клиента
+
 ## Структура
 
 - `tasks/` — документы по четырём основным задачам: цель, требования, реализация, проверка, коммиты.

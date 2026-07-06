@@ -4,7 +4,7 @@ import '../../../core/theme/apex_tokens.dart';
 import '../../../core/ui/snackbars.dart';
 import '../domain/booking_models.dart';
 
-/// BS-004 — Оценка маршала после заезда (LOGIC-006).
+/// SCR-006 — Оценка маршала после заезда (LOGIC-010).
 class MarshalRatingSection extends StatefulWidget {
   const MarshalRatingSection({
     required this.marshalName,

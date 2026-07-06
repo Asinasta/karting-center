@@ -31,6 +31,9 @@
 | TC-13 | 401 → refresh → retry | Истёкший access token | Один refresh, повтор успешен | `client/test/data/repositories_test.dart` |
 | TC-14 | Фильтры в query | `SlotFilter.toQuery()` | `track_config_type`, `marshal_id` | `repositories_test.dart` |
 | TC-15 | Smoke UI (ручной) | Список → OTP → бронь → отмена | Полный flow без ошибок | Ручная проверка |
+| TC-16 | Оценка маршала | POST/PATCH/DELETE marshal-rating | Eligibility, already_rated | `test_marshal_ratings.py` |
+| TC-17 | Лояльность | createBooking со скидкой tier | price_total со скидкой | `test_loyalty.py` |
+| TC-18 | Loyalty preview | PricePolicy с discount | Формула LOGIC-009 | `booking_policies_test.dart` |
 
 ## Найденные и исправленные баги
 
@@ -47,11 +50,11 @@
 
 ## Проверка вручную
 
-```powershell
+```bash
 # Backend
 cd backend
-.\.venv\Scripts\python.exe manage.py contract-check
-.\.venv\Scripts\python.exe manage.py test
+python manage.py contract-check
+python manage.py test
 
 # Client
 cd client
@@ -62,9 +65,9 @@ flutter test
 Результат на момент сдачи:
 
 - `contract-check` — OK.
-- Backend pytest — все тесты проходят.
+- Backend pytest — все тесты проходят (~66).
 - `flutter analyze` — 0 issues.
-- `flutter test` — 17 тестов passed.
+- `flutter test` — 29 тестов passed.
 - Smoke UI — список заездов и карточка проверены в браузере на `http://127.0.0.1:3000`.
 
 ## Коммиты

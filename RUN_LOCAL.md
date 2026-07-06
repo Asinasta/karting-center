@@ -2,11 +2,15 @@
 
 ## 1. Backend
 
-Открой PowerShell №1:
+Терминал №1:
 
-```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\backend
-.\.venv\Scripts\python.exe manage.py run
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate          # Windows: .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+cp .env.example .env                 # Windows: copy .env.example .env
+python manage.py run
 ```
 
 Проверка:
@@ -19,14 +23,15 @@ http://localhost:8080/slots
 
 ## 2. Flutter web
 
-Открой PowerShell №2:
+Терминал №2:
 
-```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\client
+```bash
+cd client
+flutter pub get
 flutter run -d web-server --web-hostname 127.0.0.1 --web-port 3000 --dart-define=API_BASE_URL=http://localhost:8080
 ```
 
-Потом вручную открой:
+Открой вручную:
 
 ```text
 http://127.0.0.1:3000
@@ -34,32 +39,38 @@ http://127.0.0.1:3000
 
 ## Альтернатива: Chrome debug
 
-Можно пробовать так, но на этой машине Chrome debug mode может зависать на
-`Waiting for connection from debug service on Chrome...`.
-
-```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\client
+```bash
+cd client
 flutter run -d chrome --web-port 3000 --dart-define=API_BASE_URL=http://localhost:8080
 ```
 
-## После изменения зависимостей клиента
+На некоторых машинах Chrome debug mode может зависать на `Waiting for connection from debug service on Chrome...`.
 
-Только если менялся `client/pubspec.yaml`:
+## После изменения зависимостей
 
-```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\client
-flutter pub get
+**Клиент** (`client/pubspec.yaml`):
+
+```bash
+cd client && flutter pub get
 ```
 
-## После изменения зависимостей backend
+**Backend** (`backend/requirements.txt`):
 
-Только если менялся `backend/requirements.txt`:
-
-```powershell
-cd C:\Users\Asinasta\Downloads\karting-center\backend
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```bash
+cd backend && pip install -r requirements.txt
 ```
 
 ## Правило запуска
 
-Сначала запускай backend, потом Flutter-клиент.
+Сначала backend, потом Flutter-клиент.
+
+## Smoke-сценарий
+
+Список заездов → фильтры → карточка → «Записаться» → OTP (`+7...`, код **0000**) → бронь → успех → «Мои записи» → детали → оценка маршала (после старта) → отмена → профиль (лояльность) → выход.
+
+Автопроверки:
+
+```bash
+cd backend && python manage.py test
+cd client && flutter analyze && flutter test
+```

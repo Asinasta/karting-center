@@ -10,7 +10,7 @@
 flowchart TD
   Start([Запуск]) --> Auth{Есть refresh token?}
   Auth -->|Нет| SCR001[SCR-001 Вход]
-  Auth -->|Да| SCR002[SCR-002 Заезды]
+  Auth -->|Да| SCR002[SCR-002 Запись]
   SCR001 --> SCR002
   SCR002 --> BS001[BS-001 Фильтры]
   SCR002 --> SCR003[SCR-003 Карточка]
@@ -37,3 +37,5 @@ flowchart TD
 | F-008 | Профиль | Must | `getProfile`, `updateProfile`, `sendPhoneChangeOtp`, `verifyPhoneChange`, `deleteAccount` |
 | F-009 | Push: отмена центром Must, напоминания Should | Must/Should | `registerPushToken` |
 | F-010 | Карта трассы | Must | данные `geometry`, `meeting_point` |
+| F-011 | Оценка маршала | Must | `rateMarshal`, `updateMarshalRating`, `deleteMarshalRating` |
+| F-012 | Программа лояльности | Must | `getProfile`, скидка в `createBooking` |

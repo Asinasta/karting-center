@@ -31,6 +31,16 @@
 | :-- | :-- | :-- |
 | id | UUID | Идентификатор маршала |
 | name | string | Имя маршала |
+| average_rating | float? | Средняя оценка по всем отзывам (для справочника) |
+| rating_count | int? | Число оценок |
+
+### MarshalRating
+
+| Атрибут | Тип | Описание |
+| :-- | :-- | :-- |
+| stars | int | 1…5 |
+| comment | string? | Текстовый отзыв |
+| created_at | datetime | Время создания оценки |
 
 ### Slot
 
@@ -83,6 +93,24 @@
 | created_at | datetime | Дата создания |
 | cancelled_at | datetime? | Дата отмены |
 | cancel_reason | string? | Причина отмены |
+| marshal_rating | MarshalRating? | Оценка маршала после заезда |
+
+### Profile (расширение Client для API)
+
+| Атрибут | Тип | Описание |
+| :-- | :-- | :-- |
+| completed_rides_count | int | Число завершённых заездов |
+| loyalty_tier | enum (`regular`, `vip`)? | Уровень лояльности; null, если tier ещё не достигнут |
+| loyalty_discount_percent | int? | Процент скидки на новую бронь |
+
+### Notification
+
+| Атрибут | Тип | Описание |
+| :-- | :-- | :-- |
+| type | enum (`rate_marshal`, …) | Тип pending-уведомления |
+| booking_id | UUID? | Связанная бронь |
+| title | string | Заголовок |
+| body | string | Текст |
 
 ## Статусы брони
 
@@ -147,5 +175,6 @@ erDiagram
 - `price_total` рассчитывает сервер.
 - До создания брони клиент может показывать локальный preview: `slot.price * seats_count + slot.rental_price * rental_count`; после создания источником истины является `Booking.price_total`.
 - `Booking.slot` — snapshot параметров слота на момент брони. Для отмены центром backend актуализирует `Booking.status`, `Booking.slot.status`, `cancel_reason`.
+- `price_total` при `createBooking` может включать скидку лояльности (LOGIC-009); клиент показывает preview, источник истины — ответ API.
 - Клиент не изменяет `Slot`, `TrackConfig`, `Marshal`.
 - При удалении аккаунта к активным броням применяется обычная политика отмен: ранние становятся `cancelled`, поздние — `late_cancel`, начавшиеся/завершённые обрабатываются существующей инфраструктурой; исторические персональные данные анонимизируются.

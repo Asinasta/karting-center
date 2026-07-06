@@ -53,7 +53,8 @@ Auth gate: гость при записи/«Мои записи»/«Профил
 | Карточка заезда | US-4 | SCR-003 | `slot_details_screen.dart` |
 | Мои записи | US-9 | SCR-005 | `booking_list_screen.dart` |
 | Отмена брони | US-10 | BS-003 | `cancel_confirm_sheet.dart`, `CancellationPolicy` |
-| Профиль | US-14 | SCR-007 | `profile_screen.dart`, `phone_change_sheet.dart` |
+| Профиль + лояльность | US-14, US-17 | SCR-007 | `profile_screen.dart`, `loyalty_card.dart` |
+| Оценка маршала | US-16 | SCR-006 | `marshal_rating_section.dart`, `booking_repository.dart` |
 | Карта трассы | F-010 | BS-004 | `track_map_sheet.dart` (geometry + fallback) |
 
 ## Промпты
@@ -69,13 +70,13 @@ Auth gate: гость при записи/«Мои записи»/«Профил
 2. Фильтры → применить/сбросить.
 3. Карточка заезда → «Записаться» → OTP (`+7...`, код **0000**).
 4. Форма брони → успех (BS-002).
-5. «Мои записи» → детали → отмена.
-6. «Профиль» → смена имени → выход.
+5. «Мои записи» → детали → оценка маршала → отмена.
+6. «Профиль» → карточка лояльности → смена имени → выход.
 
 Автопроверки:
 
-```powershell
-cd backend && .\.venv\Scripts\python.exe manage.py test
+```bash
+cd backend && python manage.py test
 cd client && flutter analyze && flutter test
 ```
 

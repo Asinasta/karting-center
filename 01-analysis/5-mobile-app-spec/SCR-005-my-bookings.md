@@ -14,4 +14,4 @@ Loading, Empty, Error/Retry, Offline stale.
 
 ## Применяемые логики
 
-LOGIC-008.
+LOGIC-008, LOGIC-011.
