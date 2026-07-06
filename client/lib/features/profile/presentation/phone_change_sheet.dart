@@ -92,7 +92,7 @@ class _PhoneChangeSheetState extends State<_PhoneChangeSheet> {
         _status = ActionStatus.idle;
         _step = _Step.code;
       });
-      _startCountdown(60);
+      _startCountdown(20);
     } on Object catch (error) {
       if (!mounted) return;
       final failure = toAppFailure(error);

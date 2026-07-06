@@ -39,7 +39,7 @@ from ..errors import ApiError
 from ..ports import Backend, SlotFilters
 
 OTP_TTL = timedelta(minutes=5)
-OTP_RESEND_INTERVAL = timedelta(seconds=60)
+OTP_RESEND_INTERVAL = timedelta(seconds=20)
 OTP_MAX_ATTEMPTS = 5
 DEV_OTP_CODE = "0000"
 
@@ -605,7 +605,7 @@ class FixturesAdapter(Backend):
             record = self._otps.get(phone)
             if record is not None and record.attempts >= OTP_MAX_ATTEMPTS:
                 raise ApiError(
-                    "rate_limit", "Too many attempts", retry_after=60
+                    "rate_limit", "Too many attempts", retry_after=int(OTP_RESEND_INTERVAL.total_seconds())
                 )
             if not self._check_code(record, code, now):
                 if record is not None:
@@ -924,7 +924,7 @@ class FixturesAdapter(Backend):
 
             record = self._phone_change_otps.get(client_id)
             if record is not None and record.attempts >= OTP_MAX_ATTEMPTS:
-                raise ApiError("rate_limit", "Too many attempts", retry_after=60)
+                raise ApiError("rate_limit", "Too many attempts", retry_after=int(OTP_RESEND_INTERVAL.total_seconds()))
 
             code_ok = self._dev_otp_enabled and code == DEV_OTP_CODE
             if not code_ok:

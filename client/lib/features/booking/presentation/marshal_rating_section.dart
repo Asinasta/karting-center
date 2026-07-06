@@ -193,9 +193,9 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
                     ),
                     if (widget.onDelete != null) ...[
                       const SizedBox(width: ApexSpacing.sm),
-                      OutlinedButton(
+                      FilledButton(
                         onPressed: widget.submitting ? null : _confirmDelete,
-                        style: ApexButtonStyles.outlinedRed,
+                        style: ApexButtonStyles.filledRed,
                         child: const Text('Удалить'),
                       ),
                     ],

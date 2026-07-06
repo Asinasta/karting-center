@@ -116,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
         _nameController.clear();
         _consentAccepted = false;
       });
-      _startResendCountdown(60);
+      _startResendCountdown(20);
     } on Object catch (error) {
       if (!mounted) return;
       final failure = toAppFailure(error);
