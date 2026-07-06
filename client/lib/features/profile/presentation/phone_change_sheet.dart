@@ -98,7 +98,9 @@ class _PhoneChangeSheetState extends State<_PhoneChangeSheet> {
       final failure = toAppFailure(error);
       setState(() {
         _status = ActionStatus.idle;
-        _inlineError = failure.uiMessage;
+        _inlineError = failure.code == ApiErrorCode.rateLimit
+            ? null
+            : failure.uiMessage;
       });
       if (failure.code == ApiErrorCode.rateLimit && failure.retryAfter != null) {
         _startCountdown(failure.retryAfter!);
@@ -127,7 +129,9 @@ class _PhoneChangeSheetState extends State<_PhoneChangeSheet> {
       final failure = toAppFailure(error);
       setState(() {
         _status = ActionStatus.idle;
-        _inlineError = failure.uiMessage;
+        _inlineError = failure.code == ApiErrorCode.rateLimit
+            ? null
+            : failure.uiMessage;
       });
       if (failure.code == ApiErrorCode.rateLimit && failure.retryAfter != null) {
         _startCountdown(failure.retryAfter!);

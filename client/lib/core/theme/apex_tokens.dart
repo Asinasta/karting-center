@@ -13,6 +13,8 @@ class ApexColors {
   static const Color outline = Color(0xFFE5E7EB);
   /// Backdrop behind track map illustrations (matches grass in assets).
   static const Color trackMapBackdrop = Color(0xFF3D7A46);
+  /// Backdrop behind loyalty card illustration.
+  static const Color loyaltyCardBackdrop = Color(0xFF121417);
 }
 
 class ApexSpacing {

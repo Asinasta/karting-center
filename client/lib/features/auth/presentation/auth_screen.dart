@@ -122,7 +122,9 @@ class _AuthScreenState extends State<AuthScreen> {
       final failure = toAppFailure(error);
       setState(() {
         _status = ActionStatus.idle;
-        _inlineError = failure.uiMessage;
+        _inlineError = failure.code == ApiErrorCode.rateLimit
+            ? null
+            : failure.uiMessage;
       });
       if (failure.code == ApiErrorCode.rateLimit && failure.retryAfter != null) {
         _startResendCountdown(failure.retryAfter!);
@@ -170,7 +172,9 @@ class _AuthScreenState extends State<AuthScreen> {
           _step = _AuthStep.register;
           _inlineError = null;
         } else {
-          _inlineError = failure.uiMessage;
+          _inlineError = failure.code == ApiErrorCode.rateLimit
+              ? null
+              : failure.uiMessage;
         }
       });
       if (failure.code == ApiErrorCode.rateLimit && failure.retryAfter != null) {
