@@ -7,7 +7,7 @@ abstract final class ApexAssets {
   static const trackExperienced = 'assets/images/tracks/experienced.webp';
   static const loyaltyRegular = 'assets/images/loyalty/regular.webp';
 
-  static String? trackMap(TrackConfigType type) {
+  static String trackMap(TrackConfigType type) {
     return switch (type) {
       TrackConfigType.novice => trackNovice,
       TrackConfigType.experienced => trackExperienced,
