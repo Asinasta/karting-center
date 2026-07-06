@@ -54,3 +54,23 @@ flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8080
 - `FL-15`: unit-тесты policies и репозиториев (`flutter test`).
 
 Dev fixtures: телефон `+79990000000`, OTP `0000` (для любого номера в dev тоже `0000`).
+
+## Иконка приложения
+
+Иконки для web, Android, iOS, macOS и Windows **уже сгенерированы** и лежат в платформенных папках. Исходник: `assets/icon/app_icon.png`.
+
+Пересобрать иконки нужно только если вы заменили `assets/icon/app_icon.png`:
+
+```bash
+cd client
+flutter pub get
+dart run flutter_launcher_icons
+```
+
+Важно: сначала именно `flutter pub get` — без этого `dart run flutter_launcher_icons` выдаст `Could not find package flutter_launcher_icons`.
+
+Альтернатива той же команде:
+
+```bash
+flutter pub run flutter_launcher_icons
+```
