@@ -56,8 +56,7 @@ class TrackMapSheet extends StatelessWidget {
 
   bool get _hasGeometry => geometry != null && geometry!.length >= 2;
 
-  String? get _trackAsset =>
-      trackType != null ? ApexAssets.trackMap(trackType!) : null;
+  String get _trackAsset => ApexAssets.trackMap(trackType!);
 
   Future<void> _openExternalMap(BuildContext context) async {
     final uri = Uri.parse(
@@ -84,8 +83,8 @@ class TrackMapSheet extends StatelessWidget {
           ),
           const SizedBox(height: ApexSpacing.md),
           Expanded(
-            child: _trackAsset != null
-                ? _TrackIllustration(assetPath: _trackAsset!)
+            child: trackType != null
+                ? _TrackIllustration(assetPath: _trackAsset)
                 : _hasGeometry
                     ? _TrackSchema(
                         geometry: geometry!,
