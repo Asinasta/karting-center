@@ -35,7 +35,7 @@ class LoyaltyCard extends StatelessWidget {
         final compact = height < compactHeightThreshold;
         final padding = compact ? ApexSpacing.sm : ApexSpacing.lg;
         final inset = padding * 2;
-        final textAreaHeight = math.max(0, height - inset);
+        final textAreaHeight = math.max(0.0, height - inset);
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(ApexRadius.md),
