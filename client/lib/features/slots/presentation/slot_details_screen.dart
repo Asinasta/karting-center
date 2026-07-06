@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../app/app_scope.dart';
 import '../../../core/error/app_failure.dart';
 import '../../../core/theme/apex_tokens.dart';
+import '../../../core/assets/apex_assets.dart';
 import '../../../core/ui/formats.dart';
 import '../../../core/ui/load_state.dart';
 import '../../../core/ui/screen_states.dart';
@@ -54,6 +55,7 @@ class _SlotDetailsScreenState extends State<SlotDetailsScreen> {
       meetingPointLat: slot.meetingPointLat,
       meetingPointLng: slot.meetingPointLng,
       geometry: slot.trackConfig.geometry,
+      trackType: slot.trackConfig.type,
     );
   }
 
@@ -146,7 +148,10 @@ class _SlotDetailsScreenState extends State<SlotDetailsScreen> {
             value: slot.meetingPoint,
           ),
           const SizedBox(height: ApexSpacing.md),
-          _MapPreview(onTap: () => _openMap(slot)),
+          _MapPreview(
+            trackType: slot.trackConfig.type,
+            onTap: () => _openMap(slot),
+          ),
           const SizedBox(height: ApexSpacing.lg),
           FilledButton(
             onPressed: slot.isAvailable ? () => _book(slot) : null,
@@ -228,30 +233,57 @@ class _InfoRow extends StatelessWidget {
 }
 
 class _MapPreview extends StatelessWidget {
-  const _MapPreview({required this.onTap});
+  const _MapPreview({
+    required this.trackType,
+    required this.onTap,
+  });
 
+  final TrackConfigType trackType;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final assetPath = ApexAssets.trackMap(trackType);
+
     return Material(
       color: ApexColors.outline.withOpacity(0.3),
       borderRadius: BorderRadius.circular(ApexRadius.md),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(ApexRadius.md),
-        child: const SizedBox(
-          height: 120,
-          child: Center(
-            child: Column(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.asset(
+              assetPath,
+              height: 160,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.28),
+              ),
+              child: const SizedBox(
+                height: 160,
+                width: double.infinity,
+              ),
+            ),
+            const Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.map_outlined, size: 36, color: ApexColors.muted),
+                Icon(Icons.map_outlined, size: 32, color: Colors.white),
                 SizedBox(height: ApexSpacing.sm),
-                Text('Открыть карту трассы'),
+                Text(
+                  'Открыть карту трассы',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );

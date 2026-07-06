@@ -134,6 +134,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       meetingPointLat: slot.meetingPointLat,
       meetingPointLng: slot.meetingPointLng,
       geometry: slot.geometry ?? slot.trackConfig.geometry,
+      trackType: slot.trackConfig.type,
     );
   }
 

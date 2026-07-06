@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/assets/apex_assets.dart';
 import '../../../core/theme/apex_tokens.dart';
 import '../../../core/ui/snackbars.dart';
+import '../../slots/domain/slot_models.dart';
 
 /// BS-004 — Карта трассы (LOGIC-006, FL-12).
 ///
@@ -15,6 +17,7 @@ Future<void> showTrackMapSheet(
   num? meetingPointLat,
   num? meetingPointLng,
   List<List<num>>? geometry,
+  TrackConfigType? trackType,
 }) {
   return showModalBottomSheet<void>(
     context: context,
@@ -27,6 +30,7 @@ Future<void> showTrackMapSheet(
         meetingPointLat: meetingPointLat,
         meetingPointLng: meetingPointLng,
         geometry: geometry,
+        trackType: trackType,
       ),
     ),
   );
@@ -38,6 +42,7 @@ class TrackMapSheet extends StatelessWidget {
     this.meetingPointLat,
     this.meetingPointLng,
     this.geometry,
+    this.trackType,
     super.key,
   });
 
@@ -45,10 +50,14 @@ class TrackMapSheet extends StatelessWidget {
   final num? meetingPointLat;
   final num? meetingPointLng;
   final List<List<num>>? geometry;
+  final TrackConfigType? trackType;
 
   bool get _hasCoordinates => meetingPointLat != null && meetingPointLng != null;
 
   bool get _hasGeometry => geometry != null && geometry!.length >= 2;
+
+  String? get _trackAsset =>
+      trackType != null ? ApexAssets.trackMap(trackType!) : null;
 
   Future<void> _openExternalMap(BuildContext context) async {
     final uri = Uri.parse(
@@ -75,13 +84,15 @@ class TrackMapSheet extends StatelessWidget {
           ),
           const SizedBox(height: ApexSpacing.md),
           Expanded(
-            child: _hasGeometry
-                ? _TrackSchema(
-                    geometry: geometry!,
-                    meetingPointLat: meetingPointLat,
-                    meetingPointLng: meetingPointLng,
-                  )
-                : const _TextFallback(),
+            child: _trackAsset != null
+                ? _TrackIllustration(assetPath: _trackAsset!)
+                : _hasGeometry
+                    ? _TrackSchema(
+                        geometry: geometry!,
+                        meetingPointLat: meetingPointLat,
+                        meetingPointLng: meetingPointLng,
+                      )
+                    : const _TextFallback(),
           ),
           const SizedBox(height: ApexSpacing.md),
           Row(
@@ -112,6 +123,29 @@ class TrackMapSheet extends StatelessWidget {
           ),
           const SizedBox(height: ApexSpacing.sm),
         ],
+      ),
+    );
+  }
+}
+
+class _TrackIllustration extends StatelessWidget {
+  const _TrackIllustration({required this.assetPath});
+
+  final String assetPath;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ApexColors.paper,
+        borderRadius: BorderRadius.circular(ApexRadius.md),
+        border: Border.all(color: ApexColors.outline),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        assetPath,
+        fit: BoxFit.contain,
+        width: double.infinity,
       ),
     );
   }
