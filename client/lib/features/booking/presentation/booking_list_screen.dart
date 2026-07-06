@@ -101,7 +101,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Мои записи')),
+      appBar: AppBar(automaticallyImplyLeading: false),
       body: _body(),
       bottomNavigationBar: const ApexBottomNavigationBar(currentIndex: 1),
     );

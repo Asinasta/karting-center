@@ -82,6 +82,7 @@ class ApexTheme {
       navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: ApexColors.surface,
         indicatorColor: Color(0xFFFFE0DE),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
       ),
     );
   }

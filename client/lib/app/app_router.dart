@@ -158,17 +158,20 @@ class ApexBottomNavigationBar extends StatelessWidget {
         NavigationDestination(
           icon: Icon(Icons.sports_motorsports_outlined),
           selectedIcon: Icon(Icons.sports_motorsports),
-          label: 'Запись',
+          label: '',
+          tooltip: 'Запись',
         ),
         NavigationDestination(
           icon: Icon(Icons.event_note_outlined),
           selectedIcon: Icon(Icons.event_note),
-          label: 'Мои записи',
+          label: '',
+          tooltip: 'Мои записи',
         ),
         NavigationDestination(
           icon: Icon(Icons.person_outline),
           selectedIcon: Icon(Icons.person),
-          label: 'Профиль',
+          label: '',
+          tooltip: 'Профиль',
         ),
       ],
     );
