@@ -134,7 +134,7 @@ class _TrackIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
       decoration: BoxDecoration(
         color: ApexColors.asphalt,
         borderRadius: BorderRadius.circular(ApexRadius.md),
