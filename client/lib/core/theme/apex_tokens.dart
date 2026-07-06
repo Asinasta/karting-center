@@ -11,6 +11,8 @@ class ApexColors {
   static const Color surface = Color(0xFFFFFFFF);
   static const Color muted = Color(0xFF6B7280);
   static const Color outline = Color(0xFFE5E7EB);
+  /// Backdrop behind track map illustrations (matches grass in assets).
+  static const Color trackMapBackdrop = Color(0xFF3D7A46);
 }
 
 class ApexSpacing {
