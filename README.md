@@ -18,7 +18,7 @@
 
 - Backend: `http://localhost:8080` (`/docs`, `/healthz`)
 - Flutter web: `http://127.0.0.1:3000`
-- Dev OTP (fixtures): `0000`
+- Dev fixtures: телефон `+79990000000`, OTP `0000` (для любого номера в dev тоже `0000`)
 
 ## Скоуп MVP
 
