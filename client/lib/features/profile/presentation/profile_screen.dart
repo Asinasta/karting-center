@@ -10,6 +10,7 @@ import '../../../core/ui/load_state.dart';
 import '../../../core/ui/screen_states.dart';
 import '../../../core/ui/snackbars.dart';
 import '../domain/profile_models.dart';
+import 'loyalty_card.dart';
 import 'phone_change_sheet.dart';
 
 /// SCR-007 — Профиль (FL-13). Protected by the router auth gate.
@@ -229,36 +230,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.all(ApexSpacing.md),
       children: [
         if (profile.hasLoyalty) ...[
-          Card(
-            color: ApexColors.grassGreen.withOpacity(0.08),
-            child: Padding(
-              padding: const EdgeInsets.all(ApexSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.workspace_premium_outlined),
-                      const SizedBox(width: ApexSpacing.sm),
-                      Text(
-                        profile.loyaltyTier!.label,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w700),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: ApexSpacing.xs),
-                  Text('Завершённых заездов: ${profile.completedRidesCount}'),
-                  if (profile.loyaltyDiscountPercent != null)
-                    Text(
-                      'Скидка ${profile.loyaltyDiscountPercent}% на каждую новую запись',
-                    ),
-                ],
-              ),
-            ),
-          ),
+          LoyaltyCard(profile: profile),
           const SizedBox(height: ApexSpacing.md),
         ],
         Card(
