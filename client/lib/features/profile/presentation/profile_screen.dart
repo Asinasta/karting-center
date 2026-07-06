@@ -202,7 +202,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text('Профиль'),
+      ),
       body: switch (_state) {
         Loading<Profile>() => const LoadingStateView(),
         Failure<Profile>(error: final error) => ErrorStateView(

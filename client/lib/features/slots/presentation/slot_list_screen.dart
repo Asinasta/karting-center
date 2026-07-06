@@ -83,6 +83,7 @@ class _SlotListScreenState extends State<SlotListScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        title: const Text('Запись на заезды'),
         actions: [
           IconButton(
             tooltip: 'Фильтры',
