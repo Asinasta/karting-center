@@ -53,4 +53,4 @@ flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8080
 - `FL-14`: заглушка push-сервиса; плагин push не выбран. `GET /notifications` — backlog.
 - `FL-15`: unit-тесты policies и репозиториев (`flutter test`).
 
-Dev OTP-код бэкенда (fixtures): `0000`.
+Dev fixtures: телефон `+79990000000`, OTP `0000` (для любого номера в dev тоже `0000`).
