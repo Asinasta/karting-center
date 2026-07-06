@@ -3,9 +3,9 @@ import '../../features/profile/domain/profile_models.dart';
 
 /// Bundled illustration assets for tracks and loyalty.
 abstract final class ApexAssets {
-  static const trackNovice = 'assets/images/tracks/novice.png';
-  static const trackExperienced = 'assets/images/tracks/experienced.png';
-  static const loyaltyRegular = 'assets/images/loyalty/regular.png';
+  static const trackNovice = 'assets/images/tracks/novice.webp';
+  static const trackExperienced = 'assets/images/tracks/experienced.webp';
+  static const loyaltyRegular = 'assets/images/loyalty/regular.webp';
 
   static String? trackMap(TrackConfigType type) {
     return switch (type) {
