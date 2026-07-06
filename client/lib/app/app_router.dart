@@ -139,6 +139,7 @@ class ApexBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NavigationBar(
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
       selectedIndex: currentIndex,
       onDestinationSelected: (index) {
         switch (index) {
