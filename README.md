@@ -1,12 +1,12 @@
 # Karting Center «Апекс»
 
-Клиентское мобильное приложение и REST API для записи на заезды в картинг-центре «Апекс».
+Клиентское кроссплатформенное Flutter-приложение и REST API для записи на заезды в картинг-центре «Апекс».
 
 ## Структура репозитория
 
 | Папка | Содержимое |
 |---|---|
-| [`01-analysis/`](01-analysis/) | Аналитика: бриф, требования, OpenAPI, ТЗ на мобильное приложение |
+| [`01-analysis/`](01-analysis/) | Аналитика: бриф, требования, OpenAPI, ТЗ на Flutter-клиент |
 | [`02-development/`](02-development/) | Планы реализации backend и Flutter-клиента |
 | [`backend/`](backend/) | FastAPI client API (fixtures adapter для dev/test) |
 | [`client/`](client/) | Flutter MVP-клиент |

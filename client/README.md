@@ -1,6 +1,6 @@
 # Apex Flutter Client
 
-Flutter MVP-клиент для картинг-центра «Апекс».
+Кроссплатформенный Flutter MVP-клиент для картинг-центра «Апекс» (iOS, Android, web, desktop).
 
 ## Setup
 
