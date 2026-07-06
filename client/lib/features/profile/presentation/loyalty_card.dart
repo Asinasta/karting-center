@@ -15,7 +15,6 @@ class LoyaltyCard extends StatelessWidget {
   /// Max share of viewport height for the loyalty card.
   static const maxHeightFraction = 0.28;
 
-  /// Matches the loyalty card illustration (3:2).
   static const aspectRatio = 3 / 2;
 
   final Profile profile;
@@ -40,55 +39,53 @@ class LoyaltyCard extends StatelessWidget {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                const ColoredBox(color: ApexColors.loyaltyCardBackdrop),
                 Image.asset(
                   ApexAssets.loyaltyCard(tier),
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topLeft,
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.75),
-                        ],
-                      ),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                      colors: [
+                        Colors.black.withOpacity(0.72),
+                        Colors.black.withOpacity(0.35),
+                        Colors.transparent,
+                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(ApexSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            tier.label,
-                            style: textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: ApexSpacing.xs),
-                          Text(
-                            'Завершённых заездов: ${profile.completedRidesCount}',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: Colors.white70,
-                            ),
-                          ),
-                          if (profile.loyaltyDiscountPercent != null)
-                            Text(
-                              'Скидка ${profile.loyaltyDiscountPercent}% на каждую новую запись',
-                              style: textTheme.bodySmall?.copyWith(
-                                color: ApexColors.trackRed.withOpacity(0.95),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                        ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(ApexSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Spacer(),
+                      Text(
+                        tier.label,
+                        style: textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: ApexSpacing.sm),
+                      Text(
+                        'Завершённых заездов: ${profile.completedRidesCount}',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.white70,
+                        ),
+                      ),
+                      if (profile.loyaltyDiscountPercent != null)
+                        Text(
+                          'Скидка ${profile.loyaltyDiscountPercent}% на каждую новую запись',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: ApexColors.trackRed.withOpacity(0.95),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],

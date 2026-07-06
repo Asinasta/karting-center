@@ -251,39 +251,39 @@ class _MapPreview extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Image.asset(
-              assetPath,
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.contain,
-            ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.28),
+        child: SizedBox(
+          height: 160,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                assetPath,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
               ),
-              child: const SizedBox(
-                height: 160,
-                width: double.infinity,
-              ),
-            ),
-            const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.map_outlined, size: 32, color: Colors.white),
-                SizedBox(height: ApexSpacing.sm),
-                Text(
-                  'Открыть карту трассы',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.28),
                 ),
-              ],
-            ),
-          ],
+                child: const SizedBox.expand(),
+              ),
+              const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.map_outlined, size: 32, color: Colors.white),
+                  SizedBox(height: ApexSpacing.sm),
+                  Text(
+                    'Открыть карту трассы',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

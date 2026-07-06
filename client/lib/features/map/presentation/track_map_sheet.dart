@@ -134,17 +134,16 @@ class _TrackIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: ApexColors.trackMapBackdrop,
+    return ColoredBox(
+      color: ApexColors.trackMapBackdrop,
+      child: ClipRRect(
         borderRadius: BorderRadius.circular(ApexRadius.md),
-        border: Border.all(color: ApexColors.outline),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        assetPath,
-        fit: BoxFit.contain,
-        width: double.infinity,
+        child: Image.asset(
+          assetPath,
+          width: double.infinity,
+          fit: BoxFit.fitWidth,
+          alignment: Alignment.topCenter,
+        ),
       ),
     );
   }
