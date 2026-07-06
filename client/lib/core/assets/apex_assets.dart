@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+import '../../core/theme/apex_tokens.dart';
 import '../../features/slots/domain/slot_models.dart';
 import '../../features/profile/domain/profile_models.dart';
 
@@ -11,6 +14,13 @@ abstract final class ApexAssets {
     return switch (type) {
       TrackConfigType.novice => trackNovice,
       TrackConfigType.experienced => trackExperienced,
+    };
+  }
+
+  static Color trackMapBackdrop(TrackConfigType type) {
+    return switch (type) {
+      TrackConfigType.novice => ApexColors.trackMapBackdropNovice,
+      TrackConfigType.experienced => ApexColors.trackMapBackdropExperienced,
     };
   }
 

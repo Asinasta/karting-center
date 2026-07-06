@@ -84,7 +84,10 @@ class TrackMapSheet extends StatelessWidget {
           const SizedBox(height: ApexSpacing.md),
           Expanded(
             child: trackType != null
-                ? _TrackIllustration(assetPath: _trackAsset)
+                ? _TrackIllustration(
+                    assetPath: _trackAsset,
+                    trackType: trackType!,
+                  )
                 : _hasGeometry
                     ? _TrackSchema(
                         geometry: geometry!,
@@ -128,16 +131,20 @@ class TrackMapSheet extends StatelessWidget {
 }
 
 class _TrackIllustration extends StatelessWidget {
-  const _TrackIllustration({required this.assetPath});
+  const _TrackIllustration({
+    required this.assetPath,
+    required this.trackType,
+  });
 
   final String assetPath;
+  final TrackConfigType trackType;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(ApexRadius.md),
       child: ColoredBox(
-        color: ApexColors.trackMapBackdrop,
+        color: ApexAssets.trackMapBackdrop(trackType),
         child: Image.asset(
           assetPath,
           fit: BoxFit.contain,

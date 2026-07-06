@@ -246,7 +246,7 @@ class _MapPreview extends StatelessWidget {
     final assetPath = ApexAssets.trackMap(trackType);
 
     return Material(
-      color: ApexColors.trackMapBackdrop,
+      color: ApexAssets.trackMapBackdrop(trackType),
       borderRadius: BorderRadius.circular(ApexRadius.md),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
