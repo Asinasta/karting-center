@@ -76,6 +76,13 @@ _CANCELLED_BOOKING_STATUSES = frozenset(
 )
 
 
+def maybe_complete_booking_status(*, status: str, start_at: datetime, now: datetime) -> str:
+    """Active bookings are treated as completed once the slot has started."""
+    if status == "active" and now >= start_at:
+        return "completed"
+    return status
+
+
 def can_rate_marshal(*, status: str, start_at: datetime, now: datetime) -> bool:
     """LOGIC-006: rating is allowed after the ride for non-cancelled bookings."""
     if status in _CANCELLED_BOOKING_STATUSES:

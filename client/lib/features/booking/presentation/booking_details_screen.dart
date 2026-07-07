@@ -183,7 +183,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
-              BookingStatusLabel(status: booking.status),
+              BookingStatusLabel(booking: booking),
             ],
           ),
           const SizedBox(height: ApexSpacing.sm),

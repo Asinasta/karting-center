@@ -110,6 +110,15 @@ BookingGroup groupBooking(Booking booking, DateTime now) {
   return BookingGroup.upcoming;
 }
 
+/// Display/API-effective status: active bookings become completed after start.
+BookingStatus effectiveBookingStatus(Booking booking, DateTime now) {
+  if (booking.status == BookingStatus.active &&
+      !now.isBefore(booking.slot.startAt)) {
+    return BookingStatus.completed;
+  }
+  return booking.status;
+}
+
 /// RatingPolicy (LOGIC-006).
 class RatingPolicy {
   const RatingPolicy._();

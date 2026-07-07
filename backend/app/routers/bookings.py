@@ -31,8 +31,9 @@ def listBookings(  # noqa: N802
     offset: int = Query(default=0, ge=0),
     client_id: UUID = Depends(get_current_client_id),
     backend: Backend = Depends(get_backend),
+    now: datetime = Depends(get_now),
 ) -> BookingList:
-    return backend.list_bookings(client_id, limit, offset)
+    return backend.list_bookings(client_id, limit, offset, now)
 
 
 @router.get("/bookings/{booking_id}", operation_id="getBooking", response_model=Booking)
@@ -40,8 +41,9 @@ def getBooking(  # noqa: N802
     booking_id: UUID,
     client_id: UUID = Depends(get_current_client_id),
     backend: Backend = Depends(get_backend),
+    now: datetime = Depends(get_now),
 ) -> Booking:
-    return backend.get_booking(client_id, booking_id)
+    return backend.get_booking(client_id, booking_id, now)
 
 
 @router.post(

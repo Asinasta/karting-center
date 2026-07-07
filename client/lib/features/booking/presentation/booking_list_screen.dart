@@ -253,7 +253,7 @@ class _BookingCard extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                   ),
-                  BookingStatusLabel(status: booking.status),
+                  BookingStatusLabel(booking: booking),
                 ],
               ),
               const SizedBox(height: ApexSpacing.xs),
@@ -273,14 +273,17 @@ class _BookingCard extends StatelessWidget {
 
 class BookingStatusLabel extends StatelessWidget {
   const BookingStatusLabel({
-    required this.status,
+    required this.booking,
+    this.now,
     super.key,
   });
 
-  final BookingStatus status;
+  final Booking booking;
+  final DateTime? now;
 
   @override
   Widget build(BuildContext context) {
+    final status = effectiveBookingStatus(booking, now ?? DateTime.now());
     final color = switch (status) {
       BookingStatus.active => ApexColors.grassGreen,
       BookingStatus.completed => ApexColors.muted,

@@ -10,7 +10,7 @@
 | [`02-development/`](02-development/) | Планы реализации backend и Flutter-клиента |
 | [`backend/`](backend/) | FastAPI client API (fixtures adapter для dev/test) |
 | [`client/`](client/) | Flutter MVP-клиент |
-| [`docs/`](docs/) | Документация поставки: задачи, баги, промпты |
+| [`docs/`](docs/) | Документация поставки: задачи, баги, промпты, [скриншоты UI](docs/screenshots/) |
 
 ## Быстрый старт
 

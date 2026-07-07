@@ -123,3 +123,40 @@ def test_get_booking_not_found(client):
         "/bookings/00000000-0000-0000-0000-000000000000", headers=headers
     )
     assert resp.status_code == 404
+
+
+def test_list_bookings_completes_started_active_bookings():
+    from datetime import datetime, timezone
+
+    from fastapi.testclient import TestClient
+
+    from app.adapters.fixtures import FixturesAdapter
+    from app.config import Settings
+    from app.domain.clock import FixedClock
+    from app.main import create_app
+
+    from .conftest import SEED_PHONE, login
+
+    late_clock = FixedClock(datetime(2026, 7, 7, 10, 0, 0, tzinfo=timezone.utc))
+    backend = FixturesAdapter(clock=late_clock, dev_otp_enabled=True)
+    settings = Settings(
+        app_env="dev",
+        backend_adapter="fixtures",
+        jwt_access_secret="test-access-secret",
+        jwt_refresh_secret="test-refresh-secret",
+    )
+    late_client = TestClient(
+        create_app(settings=settings, backend=backend, clock=late_clock)
+    )
+    headers = login(late_client, SEED_PHONE)
+    resp = late_client.get("/bookings", headers=headers)
+    assert resp.status_code == 200
+    active_past = [
+        item
+        for item in resp.json()["items"]
+        if item["status"] == "active"
+        and item["slot"]["start_at"] < "2026-07-07T10:00:00+00:00"
+    ]
+    assert active_past == []
+    completed = [item for item in resp.json()["items"] if item["status"] == "completed"]
+    assert completed

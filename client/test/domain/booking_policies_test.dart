@@ -243,6 +243,22 @@ void main() {
         BookingGroup.past,
       );
     });
+
+    test('active booking after start displays as completed', () {
+      final booking = _booking(
+        status: BookingStatus.active,
+        startAt: now.subtract(const Duration(hours: 1)),
+      );
+      expect(effectiveBookingStatus(booking, now), BookingStatus.completed);
+    });
+
+    test('active future booking stays active', () {
+      final booking = _booking(
+        status: BookingStatus.active,
+        startAt: now.add(const Duration(hours: 1)),
+      );
+      expect(effectiveBookingStatus(booking, now), BookingStatus.active);
+    });
   });
 
   group('RatingPolicy', () {
@@ -262,7 +278,7 @@ void main() {
     test('blocks rating before start and when already rated', () {
       expect(
         RatingPolicy.canRate(
-          _booking(status: BookingStatus.active, startAt: startAt.add(const Duration(hours: 1))),
+          _booking(status: BookingStatus.active, startAt: startAt.add(const Duration(hours: 2))),
           now,
         ),
         isFalse,

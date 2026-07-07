@@ -32,6 +32,7 @@ from ..domain.policies import (
     can_rate_marshal,
     cancellation_kind,
     ensure_bookable,
+    maybe_complete_booking_status,
     price_total,
     seats_and_rental,
 )
@@ -494,6 +495,13 @@ class FixturesAdapter(Backend):
             cancel_reason=s.cancel_reason,
         )
 
+    def _sync_booking_status(self, record: BookingRecord, now: datetime) -> None:
+        record.status = maybe_complete_booking_status(
+            status=record.status,
+            start_at=record.slot_snapshot.start_at,
+            now=now,
+        )
+
     def _booking_contract(self, b: BookingRecord) -> Booking:
         rating = self._marshal_ratings.get(b.id)
         return Booking(
@@ -750,9 +758,13 @@ class FixturesAdapter(Backend):
             )
             return self._booking_contract(record)
 
-    def list_bookings(self, client_id: UUID, limit: int, offset: int) -> BookingList:
+    def list_bookings(
+        self, client_id: UUID, limit: int, offset: int, now: datetime
+    ) -> BookingList:
         with self._lock:
             mine = [b for b in self._bookings.values() if b.client_id == client_id]
+            for booking in mine:
+                self._sync_booking_status(booking, now)
             mine.sort(key=lambda b: b.created_at, reverse=True)
             total = len(mine)
             page = mine[offset : offset + limit]
@@ -769,9 +781,11 @@ class FixturesAdapter(Backend):
             raise ApiError("forbidden", "Booking belongs to another client")
         return record
 
-    def get_booking(self, client_id: UUID, booking_id: UUID) -> Booking:
+    def get_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking:
         with self._lock:
-            return self._booking_contract(self._owned_booking(client_id, booking_id))
+            record = self._owned_booking(client_id, booking_id)
+            self._sync_booking_status(record, now)
+            return self._booking_contract(record)
 
     def cancel_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking:
         with self._lock:

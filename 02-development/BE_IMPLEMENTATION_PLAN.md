@@ -6,19 +6,30 @@ BE для MVP — это клиентский API-слой поверх суще
 
 В рамках MVP не делаем новую production-БД, админку, интерфейс маршала, интерфейс владельца, CRUD расписания, онлайн-оплату и авто-погоду. Оценки маршалов, программа лояльности и push-инфраструктура входят в MVP по брифу заказчика.
 
-## Стек и ограничения
+## Стек
+
+Используемые технологии в `backend/`:
+
+- **Python 3.11+**
+- **FastAPI** — HTTP API
+- **Uvicorn** — локальный запуск (`manage.py run`)
+- **Pydantic** + **pydantic-settings** — DTO по контракту и конфигурация из `.env`
+- **PyJWT** — access/refresh токены
+- **PyYAML** — проверка контракта (`manage.py contract-check`)
+- **pytest** + **httpx** — тесты API
+- **ruff** — lint/format
+
+## Ограничения и архитектура
 
 - Формат API: REST JSON.
 - Контракт: OpenAPI 3.1 из `01-analysis/api`.
 - Авторизация: JWT Bearer access token + refresh token.
 - Публичные endpoints без Bearer: `listSlots`, `getSlot`, `listMarshals`.
 - Персональные endpoints и мутации требуют Bearer auth и owner-check.
-- Конфигурация: переменные окружения.
-- Логи: структурированные логи.
-- Локальная разработка: in-memory fixtures adapter.
-- Интеграция с production: адаптеры к существующему backend.
-- Тесты: unit, HTTP/API, adapter fixture, concurrency для создания и отмены брони.
-- Локальный запуск: API-слой с fixtures adapter, без обязательного доступа к существующему backend.
+- Конфигурация: переменные окружения (`.env`).
+- Логи: структурированные JSON-логи.
+- Локальная разработка и тесты: in-memory **fixtures adapter**; production — адаптер к существующему backend (`existing`, пока stub).
+- Тесты: HTTP/API, adapter fixtures, concurrency для создания и отмены брони.
 
 ## State ownership
 

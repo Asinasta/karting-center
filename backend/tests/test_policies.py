@@ -8,6 +8,7 @@ from app.domain.policies import (
     cancellation_kind,
     ensure_bookable,
     max_seats,
+    maybe_complete_booking_status,
     price_total,
     seats_and_rental,
 )
@@ -91,3 +92,13 @@ def test_ensure_bookable_full_gear():
 )
 def test_cancellation_boundary(delta, expected):
     assert cancellation_kind(NOW + delta, NOW) == expected
+
+
+def test_maybe_complete_booking_status():
+    start_at = NOW + timedelta(hours=1)
+    assert maybe_complete_booking_status(status="active", start_at=start_at, now=NOW) == "active"
+    assert (
+        maybe_complete_booking_status(status="active", start_at=start_at, now=start_at)
+        == "completed"
+    )
+    assert maybe_complete_booking_status(status="cancelled", start_at=start_at, now=start_at) == "cancelled"

@@ -66,10 +66,12 @@ class ExistingBackendAdapter(_NotImplementedBackend):
     ) -> Booking:
         self._todo("create_booking")
 
-    def list_bookings(self, client_id: UUID, limit: int, offset: int) -> BookingList:
+    def list_bookings(
+        self, client_id: UUID, limit: int, offset: int, now: datetime
+    ) -> BookingList:
         self._todo("list_bookings")
 
-    def get_booking(self, client_id: UUID, booking_id: UUID) -> Booking:
+    def get_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking:
         self._todo("get_booking")
 
     def cancel_booking(self, client_id: UUID, booking_id: UUID, now: datetime) -> Booking:
