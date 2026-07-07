@@ -2,7 +2,6 @@
 
 Фактический вид Flutter-клиента «Апекс» для сдачи и ревью.
 
-| | |
 |---|---|
 | Спецификация | [`01-analysis/5-mobile-app-spec/`](../../01-analysis/5-mobile-app-spec/) |
 | Запуск | [`RUN_LOCAL.md`](../../RUN_LOCAL.md) |
