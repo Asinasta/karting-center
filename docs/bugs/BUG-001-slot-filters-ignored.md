@@ -28,17 +28,16 @@
 Все API-модели и поля сверяй с 01-analysis/api.
 ```
 
-Полный контекст: `docs/prompts/chat-06-flutter-client-development.txt`.
-
 ## Проверка вручную
 
-1. Открыть список заездов.
-2. Нажать «Фильтры» → выбрать «Только свободные» → «Применить».
-3. В списке остаются только слоты со статусом «Доступен».
-4. Сбросить фильтры → снова видны все слоты за 7 дней.
+1. Открыть список заездов → «Фильтры» → «Только свободные» → «Применить» — остаются только слоты со статусом «Доступен».
+2. Выбрать тип трассы (новичковая / опытная) → список сужается по `track_config_type`.
+3. Выбрать маршала → в query уходит `marshal_id[]`, список меняется.
+4. «Сбросить» → снова дефолтный период (ближайшие 7 дней на backend).
 
-Автотест: `client/test/data/repositories_test.dart` — `listSlots builds filter query`.
+Автотест: `client/test/data/repositories_test.dart` — `listSlots builds filter query and sorts by start_at`.
 
 ## Коммит
 
-`fix(client): apply slot filters to GET /slots query (BUG-001)`
+- исправление: `e8ef923` — feat(task-03): backend API and Flutter client MVP
+- документ: `4d6ef7d` — docs(bug-001): slot filters not sent to GET /slots

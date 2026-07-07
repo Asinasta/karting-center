@@ -3,7 +3,7 @@
 ## Симптом
 
 1. При старте приложение всегда переходило на `/slots`, даже если в secure storage был refresh token — сессия не восстанавливалась (FL-03).
-2. Вкладки «Мои записи» и «Профиль» показывали заглушки вместо OTP-входа.
+2. Вкладки «Мои записи» и «Профиль» открывались гостю без редиректа на OTP-вход.
 3. «Записаться» на карточке заезда не перенаправляло гостя на SCR-001 перед формой бронирования.
 
 ## Требования
@@ -18,10 +18,10 @@
 
 ## Исправление
 
-- `SessionRepository` — secure storage, single-flight refresh, очистка при неуспехе.
-- `SessionController` — `restore()` refresh token, загрузка профиля, `signIn` / `logout`.
-- `app_router.dart` — `refreshListenable: session`, redirect на `/auth?return=...` для `/bookings*`, `/profile`, `/slots/:id/book`.
-- `SplashScreen` — только UI; навигация через redirect роутера после `checkSession()`.
+- `client/lib/features/session/data/session_repository.dart` — secure storage, single-flight refresh, очистка при неуспехе.
+- `client/lib/features/session/session_controller.dart` — `restore()` refresh token, загрузка профиля, `signIn` / `logout`.
+- `client/lib/app/app_router.dart` — `refreshListenable: session`, redirect на `/auth?return=...` для `/bookings*`, `/profile`, `/slots/:id/book`.
+- `client/lib/features/session/presentation/splash_screen.dart` — только UI; навигация через redirect роутера после `checkSession()`.
 
 ## Промпты
 
@@ -31,7 +31,6 @@ FL-02: авторизация
 После успешного OTP приложение возвращается к return intent.
 ```
 
-Полный контекст: `docs/prompts/chat-06-flutter-client-development.txt`.
 
 ## Проверка вручную
 
@@ -45,4 +44,5 @@ FL-02: авторизация
 
 ## Коммит
 
-`fix(client): session check and auth gate for protected routes (BUG-003)`
+- исправление: `e8ef923` — feat(task-03): backend API and Flutter client MVP
+- документ: `3e782cb` — docs(bug-003): missing session check and auth gate

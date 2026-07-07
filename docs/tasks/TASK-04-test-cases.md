@@ -42,6 +42,7 @@
 | 1 | [BUG-001-slot-filters-ignored.md](../bugs/BUG-001-slot-filters-ignored.md) | Клиент не передавал фильтры в `GET /slots` |
 | 2 | [BUG-002-money-kopecks-lost.md](../bugs/BUG-002-money-kopecks-lost.md) | `Money.formatted` терял копейки |
 | 3 | [BUG-003-no-session-check-and-auth-gate.md](../bugs/BUG-003-no-session-check-and-auth-gate.md) | Нет проверки сессии и auth gate |
+| 4 | [BUG-004-past-booking-shows-active-status.md](../bugs/BUG-004-past-booking-shows-active-status.md) | В «Прошедших» бронь показывала статус «Активна» |
 
 ## Промпты
 

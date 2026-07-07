@@ -14,8 +14,8 @@
 
 - `tasks/` — документы по четырём основным задачам: цель, требования, реализация, проверка, коммиты.
 - `bugs/` — найденные и исправленные баги: симптом, причина, исправление, проверка.
-- `prompts/` — все промпты, отправленные ИИ, выгруженные из чатов Cursor (по одному файлу на чат, в хронологическом порядке).
-- `screenshots/` — скриншоты UI MVP ([README](screenshots/README.md)).
+- [`prompts/prompts.md`](prompts/prompts.md) — отобранные и очищенные промпты.
+- `screenshots/` — скриншоты UI MVP.
 
 ## Задачи
 
@@ -33,3 +33,4 @@
 | 1 | [BUG-001-slot-filters-ignored.md](bugs/BUG-001-slot-filters-ignored.md) | Клиент игнорировал фильтры при запросе `GET /slots` |
 | 2 | [BUG-002-money-kopecks-lost.md](bugs/BUG-002-money-kopecks-lost.md) | Цена теряла копейки при форматировании |
 | 3 | [BUG-003-no-session-check-and-auth-gate.md](bugs/BUG-003-no-session-check-and-auth-gate.md) | Splash не проверял сессию, защищённые разделы без auth gate |
+| 4 | [BUG-004-past-booking-shows-active-status.md](bugs/BUG-004-past-booking-shows-active-status.md) | В «Прошедших» бронь показывала статус «Активна» |
