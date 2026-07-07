@@ -32,7 +32,9 @@ class LoyaltyCard extends StatelessWidget {
         final maxHeight =
             MediaQuery.sizeOf(context).height * maxHeightFraction;
         final height = math.min(width / aspectRatio, maxHeight);
-        final compact = height < compactHeightThreshold;
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final compact =
+            height < compactHeightThreshold || textScale > 1.3;
         final padding = compact ? ApexSpacing.sm : ApexSpacing.lg;
         final inset = padding * 2;
         final textAreaHeight = math.max(0.0, height - inset);
@@ -56,8 +58,8 @@ class LoyaltyCard extends StatelessWidget {
                       begin: Alignment.centerLeft,
                       end: Alignment.centerRight,
                       colors: [
-                        Colors.black.withOpacity(0.72),
-                        Colors.black.withOpacity(0.35),
+                        Colors.black.withValues(alpha: 0.72),
+                        Colors.black.withValues(alpha: 0.35),
                         Colors.transparent,
                       ],
                     ),
@@ -76,7 +78,6 @@ class LoyaltyCard extends StatelessWidget {
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: width - inset,
-                          maxHeight: textAreaHeight,
                         ),
                         child: _LoyaltyCardText(
                           profile: profile,
@@ -121,7 +122,7 @@ class _LoyaltyCardText extends StatelessWidget {
     );
     final discountStyle =
         (compact ? textTheme.bodySmall : textTheme.bodyMedium)?.copyWith(
-      color: ApexColors.trackRed.withOpacity(0.95),
+      color: ApexColors.trackRed.withValues(alpha: 0.95),
       fontWeight: FontWeight.w600,
     );
 

@@ -34,20 +34,56 @@
 | TC-16 | Оценка маршала | POST/PATCH/DELETE marshal-rating | Eligibility, already_rated | `test_marshal_ratings.py` |
 | TC-17 | Лояльность | createBooking со скидкой tier | price_total со скидкой | `test_loyalty.py` |
 | TC-18 | Loyalty preview | PricePolicy с discount | Формула LOGIC-009 | `booking_policies_test.dart` |
+| TC-19 | Loyalty card layout | Viewport 320×480, text scale 2× | Нет overflow | `client/test/widgets/loyalty_card_test.dart` |
+| TC-20 | Slot card chips layout | Узкий экран, длинный маршал | Чипы с ellipsis, нет overflow | `client/test/widgets/slot_card_test.dart` |
+| TC-21 | Splash session check | Старт приложения, GoRouter + session | Нет `setState during build` | `client/test/widgets/splash_screen_test.dart` |
 
 ## Найденные и исправленные баги
 
 | # | Документ | Кратко |
 |---|---|---|
-| 1 | [BUG-001-slot-filters-ignored.md](../bugs/BUG-001-slot-filters-ignored.md) | Клиент не передавал фильтры в `GET /slots` |
-| 2 | [BUG-002-money-kopecks-lost.md](../bugs/BUG-002-money-kopecks-lost.md) | `Money.formatted` терял копейки |
-| 3 | [BUG-003-no-session-check-and-auth-gate.md](../bugs/BUG-003-no-session-check-and-auth-gate.md) | Нет проверки сессии и auth gate |
-| 4 | [BUG-004-past-booking-shows-active-status.md](../bugs/BUG-004-past-booking-shows-active-status.md) | В «Прошедших» бронь показывала статус «Активна» |
+| 1 | [BUG-001-past-booking-shows-active-status.md](../bugs/BUG-001-past-booking-shows-active-status.md) | В «Прошедших» бронь показывала статус «Активна» |
+| 2 | [BUG-002-loyalty-card-overflow.md](../bugs/BUG-002-loyalty-card-overflow.md) | Overflow карточки лояльности при a11y text scale |
+| 3 | [BUG-003-slot-card-chip-overflow.md](../bugs/BUG-003-slot-card-chip-overflow.md) | Overflow чипов в карточке заезда |
+| 4 | [BUG-004-session-check-during-build.md](../bugs/BUG-004-session-check-during-build.md) | `setState during build` при checkSession на splash |
 
 ## Промпты
 
-- `docs/prompts/chat-06-flutter-client-development.txt` — ревизия клиента, исправление расхождений со спецификацией.
-- Ручная проверка и баг с портом 3000 — в чате «Failed to bind web development server».
+### Первый прогон анализатора и тестов
+
+```
+PS ...\client> flutter analyze
+PS ...\client> flutter test
+
+(вывод: loyalty_card_test падает с RenderFlex overflow 162px;
+flutter analyze — deprecated withOpacity, warning unnecessary_non_null_assertion)
+```
+
+### Баг со скриншотом (BUG-001)
+
+```
+[скриншот]
+Тут баг: в «Прошедших» бронь со статусом «Активна».
+```
+
+### Overflow в списке заездов (BUG-003)
+
+```
+══╡ EXCEPTION: RenderFlex overflowed by X pixels on the right ╞══
+Row: .../slot_card.dart:169:14 (ChipText)
++ Leading widget consumes the entire tile width (ListTile)
+```
+
+### Ошибка при старте (BUG-004)
+
+```
+Uncaught DartError: setState() or markNeedsBuild() called during build.
+Стек: splash_screen initState → checkSession → notifyListeners → Router
+```
+
+```
+при чём тут notifyListeners()
+```
 
 ## Проверка вручную
 
@@ -68,12 +104,5 @@ flutter test
 - `contract-check` — OK.
 - Backend pytest — все тесты проходят (~66).
 - `flutter analyze` — 0 issues.
-- `flutter test` — 29 тестов passed.
+- `flutter test` — 34 теста passed.
 - Smoke UI — список заездов и карточка проверены в браузере на `http://127.0.0.1:3000`.
-
-## Коммиты
-
-- `test(backend): add API and policy test suite`
-- `test(client): add domain policies and repository tests`
-- `docs(task-04): test cases and bug traceability`
-- `fix(client): slot filters, money formatting, session auth gate` — исправления багов 1–3

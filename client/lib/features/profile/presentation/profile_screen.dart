@@ -242,7 +242,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.person_outline),
                 title: const Text('Имя'),
-                subtitle: Text(profile.name),
+                subtitle: Text(
+                  profile.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 trailing: const Icon(Icons.edit_outlined),
                 onTap: disabled ? null : () => _editName(profile),
               ),
@@ -250,7 +254,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ListTile(
                 leading: const Icon(Icons.phone_outlined),
                 title: const Text('Телефон'),
-                subtitle: Text(profile.phone),
+                subtitle: Text(
+                  profile.phone,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: disabled ? null : () => _changePhone(profile),
               ),
@@ -261,10 +269,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Card(
           child: Column(
             children: [
-              const ListTile(
-                leading: Icon(Icons.notifications_outlined),
-                title: Text('Уведомления'),
-                subtitle: Text('Напоминания об отменах, заездах и оценке маршала'),
+              ListTile(
+                leading: const Icon(Icons.notifications_outlined),
+                title: const Text('Уведомления'),
+                subtitle: const Text(
+                  'Напоминания об отменах, заездах и оценке маршала',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const Divider(height: 1),
               ListTile(

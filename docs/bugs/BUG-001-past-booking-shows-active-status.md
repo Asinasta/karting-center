@@ -1,4 +1,4 @@
-# BUG-004. В «Прошедших» бронь отображалась со статусом «Активна»
+# BUG-001. В «Прошедших» бронь отображалась со статусом «Активна»
 
 ## Симптом
 
@@ -28,7 +28,6 @@
 Тут баг: в «Прошедших» бронь со статусом «Активна».
 ```
 
-
 ## Проверка вручную
 
 1. Войти под seed-клиентом, открыть «Мои записи».
@@ -39,7 +38,3 @@
 
 - `backend/tests/test_bookings.py` — `test_list_bookings_completes_started_active_bookings`
 - `client/test/domain/booking_policies_test.dart` — `effectiveBookingStatus`
-
-## Коммит
-
-- исправление: `8cca1f2` — docs: add MVP UI screenshots and refresh delivery docs (в том же коммите — sync статуса брони)

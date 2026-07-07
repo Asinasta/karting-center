@@ -173,7 +173,7 @@ class _MarshalRatingSectionState extends State<MarshalRatingSection> {
                 ],
               ),
             ] else ...[
-              _StarRow(stars: rating!.stars, interactive: false),
+              _StarRow(stars: rating.stars, interactive: false),
               if (rating.comment != null && rating.comment!.isNotEmpty) ...[
                 const SizedBox(height: ApexSpacing.sm),
                 Text(

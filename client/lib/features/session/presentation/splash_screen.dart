@@ -22,9 +22,12 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.sessionController.state is CheckingSession) {
-      widget.sessionController.checkSession();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (widget.sessionController.state is CheckingSession) {
+        widget.sessionController.checkSession();
+      }
+    });
   }
 
   @override

@@ -83,6 +83,9 @@ class SessionController extends ChangeNotifier {
   }
 
   void _setState(SessionState next) {
+    if (_state == next) {
+      return;
+    }
     _state = next;
     notifyListeners();
   }

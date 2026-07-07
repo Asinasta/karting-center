@@ -180,7 +180,7 @@ class _CancelReasonBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(ApexSpacing.md),
       decoration: BoxDecoration(
-        color: ApexColors.trackRed.withOpacity(0.08),
+        color: ApexColors.trackRed.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(ApexRadius.sm),
       ),
       child: Row(
@@ -264,7 +264,7 @@ class _MapPreview extends StatelessWidget {
               ),
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.28),
+                  color: Colors.black.withValues(alpha: 0.28),
                 ),
                 child: const SizedBox.expand(),
               ),

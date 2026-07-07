@@ -76,7 +76,7 @@ class OfflineStaleBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: ApexColors.signalAmber.withOpacity(0.18),
+      color: ApexColors.signalAmber.withValues(alpha: 0.18),
       child: Padding(
         padding: const EdgeInsets.all(ApexSpacing.sm),
         child: Row(

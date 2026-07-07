@@ -196,7 +196,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             Container(
               padding: const EdgeInsets.all(ApexSpacing.md),
               decoration: BoxDecoration(
-                color: ApexColors.trackRed.withOpacity(0.08),
+                color: ApexColors.trackRed.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(ApexRadius.sm),
               ),
               child: Row(

@@ -102,7 +102,7 @@ class _CancelConfirmSheetState extends State<_CancelConfirmSheet> {
               Container(
                 padding: const EdgeInsets.all(ApexSpacing.md),
                 decoration: BoxDecoration(
-                  color: ApexColors.signalAmber.withOpacity(0.18),
+                  color: ApexColors.signalAmber.withValues(alpha: 0.18),
                   borderRadius: BorderRadius.circular(ApexRadius.sm),
                 ),
                 child: const Row(

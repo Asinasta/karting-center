@@ -125,7 +125,7 @@ class SlotStatusLabel extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(ApexRadius.sm),
       ),
       child: Padding(
@@ -171,7 +171,13 @@ class ChipText extends StatelessWidget {
         children: [
           Icon(icon, size: 16),
           const SizedBox(width: ApexSpacing.xs),
-          Text(label),
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );

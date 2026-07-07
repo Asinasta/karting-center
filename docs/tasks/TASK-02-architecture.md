@@ -65,10 +65,39 @@ presentation (экраны SCR/BS)
 
 ## Промпты
 
-- `docs/prompts/chat-01-requirements-generation.txt` — data model и mobile spec.
-- `docs/prompts/chat-02-requirements-audit-and-dev-plans.txt` — планы BE/Client.
-- `docs/prompts/chat-04-backend-development.txt` — реализация FastAPI.
-- `docs/prompts/chat-06-flutter-client-development.txt` — реализация Flutter.
+### Архитектура и схема данных
+
+```
+По требованиям из 01-analysis/2-requirements/ спроектируй MVP:
+
+1. Ресурсная модель данных (Client, Slot, Booking, Marshal, TrackConfig, Money)
+   — в 01-analysis/4-design/data-model.md. Канон — OpenAPI, не SQL.
+
+2. OpenAPI-контракт в 01-analysis/api/ (auth, slots, bookings, profile, marshals).
+
+3. Архитектуру backend (FastAPI):
+   routers → domain policies → ports → FixturesAdapter (dev) / ExistingBackendAdapter (prod).
+
+4. Архитектуру Flutter-клиента:
+   presentation → data (репозитории) → domain (модели, policies);
+   go_router, auth gate, secure storage, refresh token.
+
+Границы: расписание и админка — во внешнем бэкенде (read-only для MVP).
+Публичные GET /slots, /marshals — без токена; бронирование и профиль — с Bearer.
+```
+
+### Старт разработки (контекст для архитектуры в коде)
+
+```
+Ты работаешь в проекте karting-center.
+
+Источники: 01-analysis/, 02-development/.
+Прочитай CMP_CLIENT_IMPLEMENTATION_PLAN.md, BE_IMPLEMENTATION_PLAN.md,
+5-mobile-app-spec/, 01-analysis/api/, RUN_LOCAL.md.
+
+Правило: код не должен противоречить 01-analysis и 02-development.
+При конфликте документов — остановись и задай вопрос.
+```
 
 ## Проверка вручную
 
@@ -81,9 +110,3 @@ cd backend
 - `contract-check` — 0 расхождений с OpenAPI.
 - `test` — все pytest-тесты зелёные.
 - `GET http://localhost:8080/slots` — JSON-массив слотов без токена.
-
-## Коммиты
-
-- `docs: add architecture and data model (task-02)` — этот документ.
-- `feat(backend): FastAPI client API with fixtures adapter` — код `backend/`.
-- `feat(client): Flutter MVP per CMP plan` — код `client/`.
